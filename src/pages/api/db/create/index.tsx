@@ -2,21 +2,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
+import Pinecone from '@/utils/pinecone';
 
 type Data = {
   data: string
 }
 
 const bodySchema = object({
-  title: string(),
-  content: string()
+  name: string()
 })
 
 interface FetchRequest extends NextApiRequest {
   body: TypeOf<typeof bodySchema>
 }
 
-export default function handler(req: FetchRequest, res: NextApiResponse<Data>) {
+export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
   const token = authHandler(req);
   if (!token) return res.status(403).json({ data: 'Invalid Request' });
@@ -30,7 +30,17 @@ export default function handler(req: FetchRequest, res: NextApiResponse<Data>) {
     if (!result.success) return res.status(400).send({data: 'Invalid Data'});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const {title, content} = req.body;
+    const { name } = req.body;
+    const pinecone  = await Pinecone("us-central1-gcp", "53e7223a-a1c0-4c70-b4a7-3efe310092ee")
+    await pinecone.createIndex({ 
+      createRequest: {
+        name: name,
+        dimension: 1536
+      }
+    }).catch(err => {
+      return res.status(500).json({ data: 'Something went wrong' });
+    });
+
   }
-  res.status(200).json({ data: 'Fetch user data' })
+  res.status(200).json({ data: 'Success' });
 }

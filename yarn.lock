@@ -158,6 +158,13 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@pinecone-database/pinecone@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@pinecone-database/pinecone/-/pinecone-0.0.11.tgz#de2130ff74206686b8f4d03cd8d5a48f807dad4c"
+  integrity sha512-mmIcmrFEiU8uqprexuCBpNvcVI2yef3JaVO5pbqEaeHmsLG6X805wUdBKv7JpE3EAr+2GSE/MO0ND+lLKWBuVg==
+  dependencies:
+    cross-fetch "^3.1.5"
+
 "@pkgr/utils@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@pkgr/utils/-/utils-2.3.1.tgz#0a9b06ffddee364d6642b3cd562ca76f55b34a03"
