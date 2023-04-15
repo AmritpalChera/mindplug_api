@@ -16,12 +16,12 @@ interface FetchRequest extends NextApiRequest {
   body: TypeOf<typeof bodySchema>
 }
 
-export default function handler(req: FetchRequest, res: NextApiResponse<Data>) {
+export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
-  const token = authHandler(req);
-  if (!token) return res.status(403).json({ data: 'Invalid Request' });
+  const userData = await authHandler(req);
+  if (!userData) return res.status(403).json({ data: 'Invalid Request' });
   
-  console.log(token)
+  console.log(userData)
 
   if (req.method === 'POST') {
 
