@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import Pinecone from '@/utils/pinecone';
+import Pinecone from '@/utils/setup/pinecone';
 
 type Data = {
   error?: string | undefined,

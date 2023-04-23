@@ -2,10 +2,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import Pinecone from '@/utils/pinecone';
+import initializePinecone from '@/utils/setup/pinecone';
 
 type Data = {
-  data: string
+  success?: boolean,
+  error?: any
 }
 
 const bodySchema = object({
@@ -18,29 +19,33 @@ interface FetchRequest extends NextApiRequest {
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
-  const userData = authHandler(req);
-  if (!userData) return res.status(403).json({ data: 'Invalid Request' });
-  
-  console.log(userData)
+  const userData = await authHandler(req);
+  if (!userData) return res.status(403).json({ error: 'Invalid auth' });
 
   if (req.method === 'POST') {
 
     //parse request
     const result = bodySchema.safeParse(req.body);
-    if (!result.success) return res.status(400).send({data: 'Invalid Data'});
+    if (!result.success) return res.status(400).send({error: 'Invalid request parameters'});
 
-    // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
     const { name } = req.body;
-    const pinecone  = await Pinecone("us-central1-gcp", "53e7223a-a1c0-4c70-b4a7-3efe310092ee")
-    await pinecone.createIndex({ 
-      createRequest: {
-        name: name,
-        dimension: 1536
-      }
-    }).catch(err => {
-      return res.status(500).json({ data: 'Something went wrong' });
-    });
 
+    try {
+      const pinecone = await initializePinecone(userData.pineconeKeyEnv, userData.pineconeKey)
+      await pinecone.createIndex({
+        createRequest: {
+          name: name,
+          dimension: 1536
+        }
+      });
+      return res.status(200).json({ success: true });
+
+    } catch (e) {
+      console.log(e)
+      return res.status(500).json({ error: `unable to create index: ${e}` });
+    }
+
+  } else {
+    return res.status(500).json({ error: 'invalid request' });
   }
-  res.status(200).json({ data: 'Success' });
 }

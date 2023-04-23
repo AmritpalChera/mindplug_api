@@ -1,5 +1,5 @@
 import type { NextApiRequest } from 'next';
-import supabase from './supabase';
+import supabase from './setup/supabase';
 
 // validates the token and returns a boolean
 export default async function authHandler(req: NextApiRequest) {

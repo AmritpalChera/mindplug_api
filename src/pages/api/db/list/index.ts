@@ -2,16 +2,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import Pinecone from '@/utils/pinecone';
+import initializePinecone from '@/utils/setup/pinecone';
 
 type Data = {
-  error?: string | undefined,
-  success?: string | undefined,
-  data?: any
+  success?: boolean,
+  error?: string,
+  list?: string[],
 }
-const bodySchema = object({
-  name: string()
-});
+
+const bodySchema = object({})
 
 interface FetchRequest extends NextApiRequest {
   body: TypeOf<typeof bodySchema>
@@ -19,27 +18,30 @@ interface FetchRequest extends NextApiRequest {
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
-  const token = authHandler(req);
-  if (!token) return res.status(403).json({ data: 'Invalid Request' });
-  
-  console.log(token)
+  const userData = await authHandler(req);
+  if (!userData) return res.status(403).json({ error: 'Invalid auth' });
 
   if (req.method === 'POST') {
 
     //parse request
     const result = bodySchema.safeParse(req.body);
-    if (!result.success) return res.status(400).send({error: 'Invalid Data'});
+    if (!result.success) return res.status(400).send({error: 'Invalid request parameters'});
 
-    // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { name } = req.body;
-    const pinecone  = await Pinecone("us-central1-gcp", "53e7223a-a1c0-4c70-b4a7-3efe310092ee")
-    const list = await pinecone.listIndexes().catch(err => {
-      return res.status(500).json({ error: 'Something went wrong' });
-    });
+    try {
+      const pinecone  = await initializePinecone(userData.pineconeKeyEnv, userData.pineconeKey)
+      const list = await pinecone.listIndexes().then((res) => {
+        return res;
+      });
+   
+      return res.status(200).json({ success: true, list: list });
+    } catch (e) {
+      console.log('unable to list indecies: ', e);
+      return res.status(500).json({success: false, error: 'unable to query list'})
+    }
+    
 
-    return res.status(200).json({ data: list });
-
+  } else {
+    // if not post request
+    return res.status(500).json({ error: 'invalid request' });
   }
-  
-  res.status(200).json({ success: 'Success' });
 }
