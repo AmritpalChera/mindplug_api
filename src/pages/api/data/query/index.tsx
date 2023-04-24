@@ -13,7 +13,7 @@ type Data = {
 
 const bodySchema = object({
   db: string(),
-  content: string(),
+  inquiry: string(),
   collection: ( string().optional() )
 })
 
@@ -35,9 +35,9 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db, content, collection } = req.body;
+    const { db, inquiry, collection } = req.body;
 
-    const embeds: EmbedType[] = await embeddingGenerator({ openaiKey: userData.openaiKey, content: [content] });
+    const embeds: EmbedType[] = await embeddingGenerator({ openaiKey: userData.openaiKey, content: [inquiry] });
 
     try {
       const data = await queryData({
