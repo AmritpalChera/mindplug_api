@@ -18,7 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } else if (type === 'customer.subscription.deleted') {
     const { customer } = req.body?.data?.object;
-    const {email} = await stripe.customers.retrieve(customer);
+    const userData: any = await stripe.customers.retrieve(customer);
+    const email = userData.email;
     await supabase.from('customers').update({ active: false }).eq('email', email);
   } else if (type === 'customer.subscription.updated') {
     // TODO: do something
