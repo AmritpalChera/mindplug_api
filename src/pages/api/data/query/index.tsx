@@ -23,7 +23,12 @@ interface FetchRequest extends NextApiRequest {
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
-  const userData = await authHandler(req);
+  let userData;
+  try {
+    userData = await authHandler(req);
+  } catch (e: any) {
+    return res.status(403).json({error: e})
+  }
   if (!userData) return res.status(403).json({ error: 'Invalid Request' });
 
   if (req.method === 'POST') {

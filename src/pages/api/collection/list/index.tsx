@@ -25,7 +25,13 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
   if (req.method === 'POST') {
 
     // Extract token
-    const userData = await authHandler(req);
+    let userData;
+    try {
+      userData = await authHandler(req);
+    } catch (e: any) {
+      return res.status(403).json({error: e})
+    }
+   
     if (!userData) return res.status(403).json({ error: 'Invalid auth' });
 
     // parse request

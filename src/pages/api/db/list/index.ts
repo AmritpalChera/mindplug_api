@@ -12,7 +12,12 @@ type Data = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   //Extract token
-  const userData = await authHandler(req);
+  let userData;
+  try {
+    userData = await authHandler(req);
+  } catch (e: any) {
+    return res.status(403).json({error: e})
+  }
   if (!userData) return res.status(403).json({ error: 'Invalid auth' });
 
   if (req.method === 'POST') {
