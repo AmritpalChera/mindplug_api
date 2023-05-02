@@ -13,7 +13,7 @@ type Data = {
 
 const bodySchema = object({
   db: string(),
-  namespace: string()
+  collection: string()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -40,7 +40,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     if (!result.success) return res.status(400).send({error: 'Invalid required parameters', success: false});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db, namespace } = req.body;
+    const { db, collection } = req.body;
 
     try {
       const pinecone = await initializePinecone(userData.pineconeKeyEnv, userData.pineconeKey);
@@ -48,7 +48,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const index = pinecone.Index(db);
       await index.delete1({
         deleteAll: true,
-        namespace: namespace
+        namespace: collection
       });
       return res.status(200).json({ success: true });
 
