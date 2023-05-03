@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { array, object, string, TypeOf } from "zod";
+import { array, number, object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
 import generateVector from '@/utils/pinecone/generateVector';
@@ -17,7 +17,8 @@ type Data = {
 const bodySchema = object({
   collection: string().optional(),
   content: array(string()),
-  db: string()
+  db: string(),
+  chunkSize: number().optional()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -46,14 +47,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     if (!result.success) return res.status(400).send({error: 'Invalid request parameters'});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { collection, content, db } = req.body;
+    const { collection, content, db, chunkSize } = req.body;
 
 
     // collection is an eq of namespace and content is the metadata of the embedidngs
     // id should match the id in the supabase database
 
     try {
-      const embeds: EmbedType[] = await embeddingGenerator({ openaiKey: userData.openaiKey, content: content });
+      const embeds: EmbedType[] = await embeddingGenerator({ openaiKey: userData.openaiKey, content: content, chunkSize: chunkSize });
       const pineconeVectors = generateVector({ data: embeds });
   
   

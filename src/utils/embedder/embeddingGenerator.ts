@@ -13,12 +13,13 @@ const limiter = new Bottleneck({
 type Data = {
   content: string[];
   openaiKey: string;
+  chunkSize?: number
 }
 
-export default async function embeddingGenerator({ openaiKey, content }: Data) {
+export default async function embeddingGenerator({ openaiKey, content, chunkSize }: Data) {
   const openai = initializeOpenai(openaiKey)
 
-  const chunks = await chunkRawData(content);
+  const chunks = await chunkRawData(content, chunkSize);
   // console.log(response.data);
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
