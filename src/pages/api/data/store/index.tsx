@@ -7,6 +7,7 @@ import generateVector from '@/utils/pinecone/generateVector';
 import upsertData from '@/utils/pinecone/upsert';
 import supabase from '@/utils/setup/supabase';
 import { EmbedType } from '@/utils/types/types';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   data?: object,
@@ -25,6 +26,7 @@ interface FetchRequest extends NextApiRequest {
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   //Extract token
+  await runMiddleware(req, res);
 
   if (req.method === 'POST') {
 

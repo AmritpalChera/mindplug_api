@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import Pinecone from '@/utils/setup/pinecone';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   error?: string | undefined,
@@ -19,6 +20,8 @@ interface FetchRequest extends NextApiRequest {
 }
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
+  await runMiddleware(req, res);
+
   //Extract token
   const token = authHandler(req);
   if (!token) return res.status(403).json({ error: 'Invalid Request' });

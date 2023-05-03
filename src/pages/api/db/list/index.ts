@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   success?: boolean,
@@ -11,6 +12,8 @@ type Data = {
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+  await runMiddleware(req, res);
+
   //Extract token
   let userData;
   try {

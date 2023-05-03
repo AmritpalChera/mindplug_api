@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import supabase from '@/utils/setup/supabase';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   data?: any | null,
@@ -20,7 +21,8 @@ interface FetchRequest extends NextApiRequest {
 }
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
-  
+  await runMiddleware(req, res);
+
 
   if (req.method === 'POST') {
 

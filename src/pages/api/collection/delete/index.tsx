@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   success?: boolean
@@ -21,7 +22,7 @@ interface FetchRequest extends NextApiRequest {
 }
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
-  
+  await runMiddleware(req, res);
 
   if (req.method === 'POST') {
 

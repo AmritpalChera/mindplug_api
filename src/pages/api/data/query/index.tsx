@@ -5,6 +5,7 @@ import authHandler from '@/utils/authHandler';
 import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
 import queryData from '@/utils/pinecone/query';
 import { EmbedType } from '@/utils/types/types';
+import runMiddleware from '@/utils/setup/middleware';
 
 type Data = {
   data?: object,
@@ -22,6 +23,8 @@ interface FetchRequest extends NextApiRequest {
 }
 
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
+  await runMiddleware(req, res);
+
   //Extract token
   let userData;
   try {
