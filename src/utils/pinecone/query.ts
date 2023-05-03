@@ -7,6 +7,7 @@ type UpsertData = {
   inquiry: number [],
   indexName: string,
   collection: string | undefined,
+  numberResults?: number
 }
 
 type Metadata = {
@@ -22,7 +23,7 @@ export default async function queryData(data: UpsertData) {
   // query to return the top 3 results
   const queryRequest = {
     vector: data.inquiry,
-    topK: 3,
+    topK: data.numberResults || 3,
     includeMetadata: true,
     namespace: data.collection
   };
