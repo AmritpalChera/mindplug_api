@@ -28,7 +28,7 @@ const formatItem = (item: any) => {
 
 const formatResponse = (response: any) => {
   // we will return the top 2
-  const queries = response.items.map((item: any) => formatItem(item));
+  const queries = response?.items?.map((item: any) => formatItem(item));
   const toReturn = queries.slice(0, 3);
   return toReturn;
 }
