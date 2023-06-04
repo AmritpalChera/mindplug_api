@@ -5,7 +5,7 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import braveSearch from '@/utils/setup/brave';
-import googleSearch from '@/utils/setup/google';
+import googleSearch, { googleSearchStrict } from '@/utils/setup/google';
 import formatResponse from '@/utils/webFormat/google';
 
 type Data = {
@@ -42,9 +42,9 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { input } = req.body;
 
     try {
-      const data = await googleSearch.get(input).then(res => res?.data).catch(err => {
-        console.log(err?.response?.data)
-        return err?.response?.data;
+      const data = await googleSearch.get(input).then(res => res?.data).catch(async err => {
+        const strictData = await googleSearchStrict.get(input).then(res => res?.data).catch(err => {throw "Unable to generate"});
+        return strictData
       });
 
       const toReturn = formatResponse(data);
