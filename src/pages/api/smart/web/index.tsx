@@ -43,7 +43,10 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     try {
       const data = await googleSearch.get(input).then(res => res?.data).catch(async err => {
-        const strictData = await googleSearchStrict.get(input).then(res => res?.data).catch(err => {throw "Unable to generate"});
+        const strictData = await googleSearchStrict.get(input).then(res => res?.data).catch(err => {
+          console.log(err.response.data); 
+          throw "Unable to generate"
+        });
         return strictData
       });
 
