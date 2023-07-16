@@ -11,6 +11,6 @@ export default async function authHandler(req: NextApiRequest) {
   const {data, error}= await supabase.from('keys').select().eq('mindplugKey', token);
   if (error || !data || !data[0]) throw "Invalid authorization";
   
-  await requestTracker(token, data[0]._id);
+  await requestTracker(token, data[0].userId);
   return data[0];
 }

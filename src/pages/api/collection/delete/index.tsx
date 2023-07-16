@@ -6,6 +6,7 @@ import { object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
+import supabase from '@/utils/setup/supabase';
 
 type Data = {
   success?: boolean
@@ -44,13 +45,20 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { db, collection } = req.body;
 
     try {
-      const pinecone = await initializePinecone(userData.pineconeKeyEnv, userData.pineconeKey);
+      const pinecone = await initializePinecone();
 
-      const index = pinecone.Index(db);
+      const index = pinecone.Index('mindplug');
       await index.delete1({
         deleteAll: true,
-        namespace: collection
+        namespace: `${db}-${collection}`
       });
+      const delCollec = await supabase.from('collections').delete().eq('userId', userData.userId).eq('collection', collection).eq('projectName', db).select().single();
+      if (delCollec.data) {
+        // update project details
+        const proj = await supabase.from('dbs').select('totalVectors').eq('userId', userData.userId).eq('projectName', db).single();
+        await supabase.from('dbs').update({ totalVectors: proj.data?.totalVectors - delCollec.data.totalVectors }).eq('userId', userData.userId).eq('projectName', db);
+      }
+
       return res.status(200).json({ success: true });
 
     } catch (e) {

@@ -10,6 +10,7 @@ import runMiddleware from '@/utils/setup/middleware';
 type Data = {
   data?: any | null,
   error?: string
+  count?: number
 }
 
 const bodySchema = object({
@@ -44,13 +45,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { db } = req.body;
 
     try {
-      const userCollections = await supabase.from('collections').select('collection').eq('db', db).eq('_id', userData._id)
-      .then(res => {
-        const list = res.data?.map((collection) => collection.collection);
-        return list
-      });
+      const userCollections = await supabase.from('collections').select('collection, totalVectors').eq('projectName', db).eq('userId', userData.userId)
+     
+      if (userCollections.error) {
+        res.status(500).send({ error: 'Could not get colelctions for db' });
+        return;
+      }
 
-      return res.status(200).json({ data: userCollections })
+      return res.status(200).json({ data: userCollections.data, count: userCollections.data.length })
     } catch (e) {
       return res.status(500).send({error: 'Could not query collections'})
     }

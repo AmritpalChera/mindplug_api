@@ -2,7 +2,7 @@
 
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { object, string, TypeOf } from "zod";
+import { array, object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
@@ -15,6 +15,8 @@ type Data = {
 
 const bodySchema = object({
   db: string(),
+  collection: string(),
+  vectorIds: array(string())
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -41,32 +43,23 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     if (!result.success) return res.status(400).send({error: 'Invalid required parameters', success: false});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db } = req.body;
+    const { db, collection, vectorIds } = req.body;
 
     try {
       const pinecone = await initializePinecone();
 
       const index = pinecone.Index('mindplug');
+      await index.delete1({
+        ids: vectorIds,
+        namespace: `${db}-${collection}`
+      });
 
-      const collections = await supabase.from('collections').select('collection').eq('projectName', db).eq('userId', userData.userId);
-      if (collections.error) {
-        console.log('could not get project collections: ', collections.error);
-        return res.status(500).send({ error: 'could not get collections for project' });
-      }
-
-      await Promise.all(collections.data.map(async (collection) => {
-        await index.delete1({
-          deleteAll: true,
-          namespace: `${db}-${collection.collection}`
-        });
-      }));
-
-      // now delete the project and all collections associated with this project in sb
-
+      const prevCollec = await supabase.from('collections').select('totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
+      await supabase.from('collections').update({ totalVectors: prevCollec.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('collection', collection).eq('projectName', db);
       
-      await supabase.from('collections').delete().eq('userId', userData.userId).eq('projectName', db);
-      await supabase.from('dbs').delete().eq('userId', userData.userId).eq('projectName', db);
-
+      const proj = await supabase.from('dbs').select('totalVectors').eq('userId', userData.userId).eq('projectName', db).single();
+      await supabase.from('dbs').update({ totalVectors: proj.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('projectName', db);
+    
       return res.status(200).json({ success: true });
 
     } catch (e) {

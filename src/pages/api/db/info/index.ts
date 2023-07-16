@@ -34,7 +34,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
     const { name } = req.body;
-    const pinecone  = await Pinecone("us-central1-gcp", "53e7223a-a1c0-4c70-b4a7-3efe310092ee")
+    const pinecone = await Pinecone();
     const info  = await pinecone.describeIndex({ 
      indexName: name
     }).then(res => res).catch(err => {

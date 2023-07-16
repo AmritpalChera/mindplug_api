@@ -3,11 +3,12 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
+import supabase from '@/utils/setup/supabase';
 
 type Data = {
   success?: boolean,
   error?: string,
-  list?: string[],
+  projects?: any,
 }
 
 
@@ -15,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   await runMiddleware(req, res);
 
   //Extract token
-  let userData;
+  let userData: any;
   try {
     userData = await authHandler(req);
   } catch (e: any) {
@@ -26,12 +27,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (req.method === 'POST') {
 
     try {
-      const pinecone  = await initializePinecone(userData.pineconeKeyEnv, userData.pineconeKey)
-      const list = await pinecone.listIndexes().then((res) => {
-        return res;
-      });
+      const projects = await supabase.from("dbs").select('projectName, lastUpdated, totalVectors').eq('userId', userData.userId);
+      if (projects.error) {
+        console.log('could not get user projects');
+        return res.status(500).send({ error: 'Could not get user projects. Please contact support' });
+      }
+      const toSend = await Promise.all(projects.data.map(async (proj) => {
+        const totalCollec = await supabase.from('collections').select('totalVectors').eq('projectName', proj.projectName).eq('userId', userData.userId);
+        return {
+          ...proj, 
+          collectionCount: totalCollec.data?.length || 0
+        }
+
+      }))
+      
    
-      return res.status(200).json({ success: true, list: list });
+      return res.status(200).json({ success: true, projects: toSend });
     } catch (e) {
       console.log('unable to list indecies: ', e);
       return res.status(500).json({success: false, error: 'unable to query list'})
