@@ -50,7 +50,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const index = pinecone.Index('mindplug');
       await index.delete1({
         deleteAll: true,
-        namespace: `${db}-${collection}`
+        namespace: `${db}-${collection}-${userData.userId}`
       });
       const delCollec = await supabase.from('collections').delete().eq('userId', userData.userId).eq('collection', collection).eq('projectName', db).select().single();
       if (delCollec.data) {

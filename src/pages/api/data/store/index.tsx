@@ -57,7 +57,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     try {
       const embeds: EmbedType[] = await embeddingGenerator({ content: [content], chunkSize: chunkSize });
       const pineconeVectors = generateVector({ data: embeds }, metadata);
-      const collecName = `${db}-${collection}`;
+      const collecName = `${db}-${collection}-${userData.userId}`;
 
       const totalVectors = pineconeVectors.length;
   

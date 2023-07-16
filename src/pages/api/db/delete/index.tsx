@@ -27,7 +27,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
   if (req.method === 'POST') {
 
     // Extract token
-    let userData;
+    let userData: any;
     try {
       userData = await authHandler(req);
     } catch (e: any) {
@@ -57,7 +57,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       await Promise.all(collections.data.map(async (collection) => {
         await index.delete1({
           deleteAll: true,
-          namespace: `${db}-${collection.collection}`
+          namespace: `${db}-${collection.collection}-${userData.userId}`
         });
       }));
 

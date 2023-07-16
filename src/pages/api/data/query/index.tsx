@@ -51,7 +51,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     try {
       const data = await queryData({
         search: embeds[0].embedding,
-        collection: `${db}-${collection}`,
+        collection: `${db}-${collection}-${userData.userId}`,
         numberResults: count
       })
 

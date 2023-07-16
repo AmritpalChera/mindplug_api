@@ -51,7 +51,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const index = pinecone.Index('mindplug');
       await index.delete1({
         ids: vectorIds,
-        namespace: `${db}-${collection}`
+        namespace: `${db}-${collection}-${userData.userId}`
       });
 
       const prevCollec = await supabase.from('collections').select('totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
