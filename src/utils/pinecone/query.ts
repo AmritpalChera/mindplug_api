@@ -4,7 +4,10 @@ import initializePinecone from "../setup/pinecone";
 type UpsertData = {
   search: number [],
   collection: string | undefined,
-  numberResults?: number
+  numberResults?: number,
+  customPineconeKey?: string,
+  customPineconeEnv?: string,
+  metadataFilters?: any
 }
 
 type Metadata = {
@@ -12,7 +15,7 @@ type Metadata = {
 }
 
 export default async function queryData(data: UpsertData) {
-  const pinecone = await initializePinecone();
+  const pinecone = await initializePinecone(data.customPineconeKey, data.customPineconeEnv);
 
   // retrieve index from pinecone
   const index = pinecone.Index('mindplug');
@@ -22,13 +25,14 @@ export default async function queryData(data: UpsertData) {
     vector: data.search,
     topK: data.numberResults || 3,
     includeMetadata: true,
-    namespace: data.collection
+    namespace: data.collection,
+    filters : data.metadataFilters || {}
   };
 
   // splice vectors into chunks
   try {
     const queryResult = await index.query({
-      queryRequest,
+      queryRequest
     });
     return (
       queryResult.matches?.map((match) => ({

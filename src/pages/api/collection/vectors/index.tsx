@@ -6,6 +6,7 @@ import { object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import supabase from '@/utils/setup/supabase';
 import runMiddleware from '@/utils/setup/middleware';
+import queryVectors from '@/utils/pinecone/queryVectors';
 
 type Data = {
   data?: any | null,
@@ -14,7 +15,8 @@ type Data = {
 }
 
 const bodySchema = object({
-  db: string()
+  db: string(),
+  collection: string()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -42,17 +44,36 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     if (!result.success) return res.status(400).send({error: 'Invalid required parameters', data: null});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db } = req.body;
+    const { db, collection } = req.body;
 
     try {
-      const userCollections = await supabase.from('collections').select('collection, totalVectors, collectionId').eq('projectName', db).eq('userId', userData.userId)
-     
-      if (userCollections.error) {
-        res.status(500).send({ error: 'Could not get colelctions for db' });
+      const userCollection = await supabase.from('collections').select('collectionId, totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
+
+      if (userCollection.error) {
+        console.log('user collection: ', userCollection.error)
+        res.status(500).send({ error: 'Could not find collection in DB' });
         return;
       }
 
-      return res.status(200).json({ data: userCollections.data, count: userCollections.data.length })
+      // use the id to get userCollection
+      const vectorsData = (await supabase.from('vectors').select('vectorId').eq('collectionId', userCollection.data.collectionId).order('created_at', {ascending: false}).limit(10));
+      
+      if (vectorsData.error) {
+        console.log('could not get vectors');
+        return res.status(500).send({ error: 'Could not get vectors for collection' })
+      }
+
+      const vectors = vectorsData.data.map((vectorDetail) => vectorDetail.vectorId);
+      
+      const data = await queryVectors({
+        vectorIds: vectors,
+        customPineconeKey: userData.decrypted_pineconeKey,
+        customPineconeEnv: userData.pineconeEnv,
+        namespace: `${db}-${collection}-${userData.userId}`,
+      });
+
+      return res.json({data: data, count: userCollection.data.totalVectors })
+
     } catch (e) {
       return res.status(500).send({error: 'Could not query collections'})
     }

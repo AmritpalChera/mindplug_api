@@ -6,11 +6,11 @@ type embeddingType = {
   data: EmbedType[];
 }
 
-export default function generateVector(embeddingsData: embeddingType, metadata: any) {
+export default function generateVector(embeddingsData: embeddingType, metadata?: any, vectorId?: any) {
   const { data } = embeddingsData;
   let pineconeNormalized = data.map((embedding) => {
     return {
-      id: uuidv4(),
+      id: vectorId || uuidv4(),
       values: embedding.embedding,
       metadata: {
         ...metadata,
@@ -18,5 +18,6 @@ export default function generateVector(embeddingsData: embeddingType, metadata: 
       }
     }
   });
+  if (pineconeNormalized.length > 1 && vectorId) throw new Error('Too much content for one vector');
   return pineconeNormalized;
 }

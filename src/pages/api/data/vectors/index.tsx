@@ -1,11 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { object, string, number, TypeOf, any } from "zod";
+import { object, string, TypeOf, array } from "zod";
 import authHandler from '@/utils/authHandler';
-import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
-import queryData from '@/utils/pinecone/query';
-import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
+import queryVectors from '@/utils/pinecone/queryVectors';
 
 type Data = {
   data?: object,
@@ -13,11 +11,9 @@ type Data = {
 }
 
 const bodySchema = object({
+  vectorIds: array(string()),
   db: string(),
-  search: string(),
-  collection: (string().optional()),
-  count: number().optional(),
-  metaDataFilters: any().optional(),
+  collection: string(),
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -45,19 +41,16 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db, search, collection, count, metaDataFilters } = req.body;
+    const { vectorIds, db, collection } = req.body;
 
-    const embeds: EmbedType[] = await embeddingGenerator({ content: [search] });
 
     try {
-      const data = await queryData({
-        search: embeds[0].embedding,
-        collection: `${db}-${collection}-${userData.userId}`,
-        numberResults: count,
+      const data = await queryVectors({
+        vectorIds: vectorIds,
         customPineconeKey: userData.decrypted_pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
-        metadataFilters: metaDataFilters
-      })
+        namespace: `${db}-${collection}-${userData.userId}`,
+      });
 
       return res.status(200).send({data: data})
     } catch (err) {

@@ -2,9 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
-import braveSearch from '@/utils/setup/brave';
 import googleSearch, { googleSearchStrict } from '@/utils/setup/google';
 import formatResponse from '@/utils/webFormat/google';
 
