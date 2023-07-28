@@ -21,8 +21,8 @@ export type FileContentType = {
 export type UserDataType = {
   analytics: LimiterType,
   mindplugKey: string,
-  decrypted_openaiKey: string,
-  decrypted_pineconeKey: string,
+  openaiKey: string,
+  pineconeKey: string,
   pineconeEnv: string,
   userId: string,
   plan: string

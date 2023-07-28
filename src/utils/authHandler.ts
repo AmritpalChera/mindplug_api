@@ -9,12 +9,12 @@ export default async function authHandler(req: NextApiRequest) {
   if (!authHeader)  throw "Invalid authorization";;
   // the token is the mindplug key
   const token = authHeader!.split(' ')[1];
-  const { data, error } = await supabase.from('decrypted_keys').select('mindplugKey, decrypted_openaiKey, decrypted_pineconeKey, pineconeEnv, userId, plan').eq('mindplugKey', token);
+  const { data, error } = await supabase.from('keys').select('mindplugKey, openaiKey, pineconeKey, pineconeEnv, userId, plan').eq('mindplugKey', token);
   if (error || !data || !data[0]) throw "Invalid authorization";
 
   if (data[0].plan !== 'plus') {
-    data[0].decrypted_openaiKey = null;
-    data[0].decrypted_pineconeKey = null;
+    data[0].openaiKey = null;
+    data[0].pineconeKey = null;
     data[0].pineconeEnv = null;
   }
 

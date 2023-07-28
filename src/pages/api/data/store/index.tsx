@@ -58,7 +58,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     try {
 
-      const embeds: EmbedType[] | null = await embeddingGenerator({ content: [content], chunkSize: chunkSize, customKey: userData.decrypted_openaiKey }).catch((err) => {
+      const embeds: EmbedType[] | null = await embeddingGenerator({ content: [content], chunkSize: chunkSize, customKey: userData.openaiKey }).catch((err) => {
         return null
       });
 
@@ -75,7 +75,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const upsertSuccess: boolean = await upsertData({
         vectors: pineconeVectors,
         collection: collecName,
-        customPineconeKey: userData.decrypted_pineconeKey,
+        customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
       });
 

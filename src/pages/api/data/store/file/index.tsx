@@ -79,9 +79,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     // content is now loaded as documents
     try {
-      const embeds: EmbedType[] | null = await embeddingGeneratorFile({ content: content, chunkSize: chunkSize, customKey: userData.decrypted_openaiKey });
+      const embeds: EmbedType[] | null = await embeddingGeneratorFile({ content: content, chunkSize: chunkSize, customKey: userData.openaiKey });
       if (!embeds) {
-        throw `Could not generate embeddings. ${userData.decrypted_openaiKey && 'Please check your openai key in settings.'} Please contact support if needed`;
+        throw `Could not generate embeddings. ${userData.openaiKey && 'Please check your openai key in settings.'} Please contact support if needed`;
       }
 
       const pineconeVectors = generateVector({ data: embeds }, metadata);
@@ -94,7 +94,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       const upsertSuccess: boolean = await upsertData({
         vectors: pineconeVectors,
         collection: collecName,
-        customPineconeKey: userData.decrypted_pineconeKey,
+        customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
       });
 

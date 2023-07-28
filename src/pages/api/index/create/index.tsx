@@ -39,7 +39,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { name } = req.body;
 
     try {
-      const pinecone = await initializePinecone(userData.decrypted_pineconeKey, userData.pineconeEnv);
+      const pinecone = await initializePinecone(userData.pineconeKey, userData.pineconeEnv);
       await pinecone.createIndex({
         createRequest: {
           name: name,

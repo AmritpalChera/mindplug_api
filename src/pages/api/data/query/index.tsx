@@ -55,7 +55,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         search: embeds[0].embedding,
         collection: `${db}-${collection}-${userData.userId}`,
         numberResults: count,
-        customPineconeKey: userData.decrypted_pineconeKey,
+        customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
         metadataFilters: metaDataFilters
       });

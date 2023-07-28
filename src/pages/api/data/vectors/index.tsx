@@ -48,7 +48,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     try {
       const data = await queryVectors({
         vectorIds: vectorIds,
-        customPineconeKey: userData.decrypted_pineconeKey,
+        customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
         namespace: `${db}-${collection}-${userData.userId}`,
       });

@@ -47,7 +47,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { db, collection } = req.body;
     let deleted;
     try {
-      const pinecone = await initializePinecone(userData.decrypted_pineconeKey, userData.pineconeEnv);
+      const pinecone = await initializePinecone(userData.pineconeKey, userData.pineconeEnv);
 
       const index = pinecone.Index('mindplug');
       await index.delete1({
