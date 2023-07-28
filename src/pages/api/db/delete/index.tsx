@@ -7,10 +7,12 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
+import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean
-  error?: string
+  error?: string,
+  data?: any
 }
 
 const bodySchema = object({
@@ -48,7 +50,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
       const index = pinecone.Index('mindplug');
 
-      const collections = await supabase.from('collections').select('collection').eq('projectName', db).eq('userId', userData.userId);
+      const collections = await supabase.from('collections').select('collection, collectionId').eq('projectName', db).eq('userId', userData.userId);
       if (collections.error) {
         console.log('could not get project collections: ', collections.error);
         return res.status(500).send({ error: 'could not get collections for project' });
@@ -59,15 +61,24 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
           deleteAll: true,
           namespace: `${db}-${collection.collection}-${userData.userId}`
         });
+        await supabase.from('vectors').delete().eq('collectionId', collection.collectionId);
       }));
 
       // now delete the project and all collections associated with this project in sb
 
       
       await supabase.from('collections').delete().eq('userId', userData.userId).eq('projectName', db);
-      await supabase.from('dbs').delete().eq('userId', userData.userId).eq('projectName', db);
+      const deletedProject = await supabase.from('dbs').delete().eq('userId', userData.userId).eq('projectName', db).select('totalVectors, totalCollections').single();
+      await subtractAnalyticsCount({ totalCollections: deletedProject.data?.totalCollections, totalVectors: deletedProject.data?.totalVectors, totalProjects: 1, analytics: userData.analytics });
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({
+        success: true, data: {
+          deletedCount: {
+            totalCollections: deletedProject.data?.totalCollections,
+            totalVectors: deletedProject.data?.totalVectors,
+            totalProjects: 1
+          }
+      }});
 
     } catch (e) {
       console.log(e)

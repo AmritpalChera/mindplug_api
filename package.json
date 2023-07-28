@@ -15,23 +15,33 @@
     "@types/react": "18.0.29",
     "@types/react-dom": "18.0.11",
     "@vercel/analytics": "^0.1.11",
+    "audiobuffer-to-wav": "^1.0.0",
     "axios": "^1.4.0",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
+    "fluent-ffmpeg": "^2.1.2",
+    "formidable": "^3.5.0",
+    "fs": "^0.0.1-security",
     "langchain": "^0.0.88",
     "next": "13.2.4",
     "openai": "^3.2.1",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.36.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "stripe": "^12.2.0",
     "typescript": "5.0.2",
     "uuid": "^9.0.0",
+    "ytdl-core": "^4.11.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/audiobuffer-to-wav": "^1.0.2",
     "@types/cors": "^2.8.13",
+    "@types/fluent-ffmpeg": "^2.1.21",
+    "@types/formidable": "^3.4.0",
     "@types/uuid": "^9.0.1"
   }
 }

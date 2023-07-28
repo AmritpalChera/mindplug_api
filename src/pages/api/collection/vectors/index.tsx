@@ -7,6 +7,7 @@ import authHandler from '@/utils/authHandler';
 import supabase from '@/utils/setup/supabase';
 import runMiddleware from '@/utils/setup/middleware';
 import queryVectors from '@/utils/pinecone/queryVectors';
+import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   data?: any | null,
@@ -72,6 +73,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         namespace: `${db}-${collection}-${userData.userId}`,
       });
 
+      await addAnalyticsCount({ analytics: userData.analytics });
       return res.json({data: data, count: userCollection.data.totalVectors })
 
     } catch (e) {

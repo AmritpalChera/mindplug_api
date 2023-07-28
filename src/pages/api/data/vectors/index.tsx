@@ -4,6 +4,7 @@ import { object, string, TypeOf, array } from "zod";
 import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
 import queryVectors from '@/utils/pinecone/queryVectors';
+import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   data?: object,
@@ -51,7 +52,8 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         customPineconeEnv: userData.pineconeEnv,
         namespace: `${db}-${collection}-${userData.userId}`,
       });
-
+      
+      await addAnalyticsCount({ analytics: userData.analytics });
       return res.status(200).send({data: data})
     } catch (err) {
       console.log(err);

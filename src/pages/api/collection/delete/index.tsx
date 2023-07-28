@@ -7,9 +7,11 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
+import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
-  success?: boolean
+  success?: boolean,
+  data?: any,
   error?: string
 }
 
@@ -43,7 +45,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
     const { db, collection } = req.body;
-
+    let deleted;
     try {
       const pinecone = await initializePinecone(userData.decrypted_pineconeKey, userData.pineconeEnv);
 
@@ -52,14 +54,25 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         deleteAll: true,
         namespace: `${db}-${collection}-${userData.userId}`
       });
-      const delCollec = await supabase.from('collections').delete().eq('userId', userData.userId).eq('collection', collection).eq('projectName', db).select().single();
+      const delCollec = await supabase.from('collections').delete().eq('userId', userData.userId).eq('collection', collection).eq('projectName', db).select('collectionId, totalVectors').single();
       if (delCollec.data) {
         // update project details
         const proj = await supabase.from('dbs').select('totalVectors').eq('userId', userData.userId).eq('projectName', db).single();
         await supabase.from('dbs').update({ totalVectors: proj.data?.totalVectors - delCollec.data.totalVectors }).eq('userId', userData.userId).eq('projectName', db);
+
+        //delete vectors
+        deleted = await supabase.from('vectors').delete().eq('collectionId', delCollec.data?.collectionId).select('vectorId');
+        if (deleted.error) {
+          console.log('could not delete vectors: ', deleted.error)
+        }
+        await subtractAnalyticsCount({totalCollections: 1, totalProjects: 0, totalVectors: deleted.data!.length, analytics: userData.analytics})
+      } else {
+        console.log('could not delte collection: ', delCollec.error)
       }
 
-      return res.status(200).json({ success: true });
+      
+
+      return res.status(200).json({ success: true, data: {deletedVectors: deleted?.data} });
 
     } catch (e) {
       console.log(e)

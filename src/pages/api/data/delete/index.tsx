@@ -7,6 +7,7 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
+import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean
@@ -54,12 +55,18 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         namespace: `${db}-${collection}-${userData.userId}`
       });
 
-      const prevCollec = await supabase.from('collections').select('totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
+      const prevCollec = await supabase.from('collections').select('totalVectors, collectionId').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
       await supabase.from('collections').update({ totalVectors: prevCollec.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('collection', collection).eq('projectName', db);
       
       const proj = await supabase.from('dbs').select('totalVectors').eq('userId', userData.userId).eq('projectName', db).single();
       await supabase.from('dbs').update({ totalVectors: proj.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('projectName', db);
-    
+
+      await Promise.all(vectorIds.map(async (id) => {
+        return await supabase.from('vectors').delete().eq('collectionId', prevCollec.data?.collectionId).eq('vectorId', id);
+      }))
+
+      
+      await subtractAnalyticsCount({ totalVectors: vectorIds.length, analytics: userData.analytics });
       return res.status(200).json({ success: true });
 
     } catch (e) {

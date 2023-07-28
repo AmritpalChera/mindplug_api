@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   //Extract token
   let userData;
   try {
-    userData = await authHandler(req, true);
+    userData = await authHandler(req);
   } catch (e: any) {
     return res.status(403).json({error: e})
   }

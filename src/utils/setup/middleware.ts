@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Cors from 'cors';
+import { NextRequest } from 'next/server';
 
 // Initializing the cors middleware
 // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
@@ -23,5 +24,6 @@ function runMiddleware(
     })
   })
 }
+
 
 export default runMiddleware;

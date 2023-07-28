@@ -1,19 +1,66 @@
 import supabase from "../setup/supabase";
-const quotaLimit = 300;
+
+type analyticsType = {
+  totalProjects: number,
+  totalVectors: number,
+  totalCollections: number,
+  mindplugKey: string,
+  totalRequests: number,
+  projectLimit: number,
+  vectorLimit: number
+}
+
+type analyticMetricsCount = {
+  totalProjects?: number,
+  totalVectors?: number,
+  totalCollections?: number,
+  analytics: analyticsType
+}
+
+export interface LimiterType extends analyticsType {
+  quotaExceeded: boolean,
+  customPlan: boolean
+}
+
+export const subtractAnalyticsCount = async ({ totalProjects = 0, totalVectors = 0, totalCollections = 0, analytics }: analyticMetricsCount) => {
+  await supabase.from('analytics').update({
+    totalProjects: analytics.totalProjects - totalProjects,
+    totalVectors: analytics.totalVectors - totalVectors,
+    totalCollections: analytics.totalCollections - totalCollections,
+    totalRequests: analytics.totalRequests + 1
+  }).eq('mindplugKey', analytics.mindplugKey);
+}
+
+export const addAnalyticsCount = async ({ totalProjects = 0, totalVectors = 0, totalCollections = 0, analytics }: analyticMetricsCount) => {
+  await supabase.from('analytics').update({
+    totalProjects: analytics.totalProjects + totalProjects,
+    totalVectors: analytics.totalVectors + totalVectors,
+    totalCollections: analytics.totalCollections + totalCollections,
+    totalRequests: analytics.totalRequests + 1
+  }).eq('mindplugKey', analytics.mindplugKey);
+}
 
 
-export default async function requestTracker(mindplugKey: string, _id: string) {
+export default async function requestLimiter(mindplugKey: string, _id: string) {
   // adds a request to the given mindplug key
-  let { data: current } = await supabase.from('analytics').select().eq('mindplugKey', mindplugKey).single();
+  let currData = await supabase.from('analytics').select().eq('mindplugKey', mindplugKey).single();
+  let quotaExceeded: boolean = false;
+  let customPlan = true;
+  let current = currData.data as analyticsType;
   if (!current) {
-    current = await supabase.from('analytics').upsert({ mindplugKey: mindplugKey, totalRequests: 1, userId: _id}).select().single();
-  } else if (current.totalProjects >= quotaLimit) { 
+    const newData = await supabase.from('analytics').upsert({ mindplugKey: mindplugKey, totalRequests: 1, userId: _id}).select().single();
+    if (newData.error) {
+      throw "Failed to connect to db";
+    }
+    current = newData.data as analyticsType;
+
+  } else if (current.totalProjects >= current.projectLimit || current.totalVectors >= current.vectorLimit) { 
     const {data: customer} = await supabase.from('customers').select().eq("_id", _id).single();
-    if (!customer || !customer.active) {
-      throw "Monthly quota reached for free plan"
+    if (!customer || customer.plan !== 'plus') {
+      // only throw this error if the customer is not on the self hosted plan
+      quotaExceeded = true;
+      customPlan = false;
     }
   }
-  const newCount = current.totalRequests + 1;
-  const analytics = await supabase.from('analytics').upsert({ mindplugKey: mindplugKey, totalRequests: newCount }).select('totalProjects, totalVectors, totalCollections').single();
-  return analytics.data;
+  return {...current, quotaExceeded, customPlan} as LimiterType;
 }

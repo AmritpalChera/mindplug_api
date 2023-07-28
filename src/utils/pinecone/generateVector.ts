@@ -14,6 +14,7 @@ export default function generateVector(embeddingsData: embeddingType, metadata?:
       values: embedding.embedding,
       metadata: {
         ...metadata,
+        ...embedding.metadata,
         content: embedding.content
       }
     }

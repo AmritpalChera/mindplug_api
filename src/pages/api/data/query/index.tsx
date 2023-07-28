@@ -6,6 +6,7 @@ import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
 import queryData from '@/utils/pinecone/query';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
+import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   data?: object,
@@ -57,8 +58,9 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         customPineconeKey: userData.decrypted_pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
         metadataFilters: metaDataFilters
-      })
-
+      });
+      
+      await addAnalyticsCount({analytics: userData.analytics})
       return res.status(200).send({data: data})
     } catch (err) {
       console.log(err);

@@ -5,11 +5,10 @@ import authHandler from '@/utils/authHandler';
 import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
 import generateVector from '@/utils/pinecone/generateVector';
 import upsertData from '@/utils/pinecone/upsert';
-import supabase from '@/utils/setup/supabase';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
-import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 import updateSupabaseStore, { checkStoreLimits } from '@/utils/supabase/storeHelper';
+import loadWebContent from '@/utils/webParsers/loadWebpage';
 
 type Data = {
   data?: object,
@@ -18,7 +17,7 @@ type Data = {
 
 const bodySchema = object({
   collection: string(),
-  content: string(),
+  url: string(),
   db: string(),
   metadata: record(any()),
   chunkSize: number().optional(),
@@ -51,10 +50,18 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     if (!result.success) return res.status(400).send({error: result.error});
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { collection, db, chunkSize, metadata, vectorId, content } = req.body;
+    const { collection, db, chunkSize, metadata, vectorId, url } = req.body;
 
     // collection is an eq of namespace and content is the metadata of the embedidngs
     // id should match the id in the supabase database
+    let content: string = '';
+    try {
+      content = await loadWebContent(url);
+    } catch (e) {
+      console.log('could not get web content: ', e);
+      return res.status(403).send({ error: 'Could not get content from URL.' });
+    }
+    
 
     try {
 

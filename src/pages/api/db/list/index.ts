@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import authHandler from '@/utils/authHandler';
-import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
+import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean,
@@ -12,7 +12,7 @@ type Data = {
 }
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await runMiddleware(req, res);
 
   //Extract token
@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
       }))
       
-   
+      await addAnalyticsCount({analytics: userData.analytics})
       return res.status(200).json({ success: true, projects: toSend });
     } catch (e) {
       console.log('unable to list indecies: ', e);
