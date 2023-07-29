@@ -29,6 +29,9 @@ export default async function handler(req: CheckoutReq, res: NextApiResponse) {
   if (development) {
     if (priceString === CustomerPlans.BASIC) priceId = 'price_1NZ2T4JgAg8HpO3H6xU39IKb';
     else if (priceString === CustomerPlans.CUSTOM) priceId = 'price_1NZ2TwJgAg8HpO3HNpwfDlP7';
+  } else {
+    if (priceString === CustomerPlans.BASIC) priceId = 'price_1NZ5rGJgAg8HpO3Hyusyoi2m';
+    else if (priceString === CustomerPlans.CUSTOM) priceId = 'price_1NZ5s1JgAg8HpO3HSgpPDVAj';
   }
 
   if (!priceId) return res.status(403).send({error: 'Invalid price id'})
