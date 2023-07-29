@@ -27,3 +27,9 @@ export type UserDataType = {
   userId: string,
   plan: string
 }
+
+export const CustomerPlans = {
+  LITE: 'lite',
+  BASIC: 'basic',
+  CUSTOM: 'custom'
+}

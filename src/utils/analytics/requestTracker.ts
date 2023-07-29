@@ -55,7 +55,7 @@ export default async function requestLimiter(mindplugKey: string, _id: string) {
     current = newData.data as analyticsType;
 
   } else if (current.totalProjects >= current.projectLimit || current.totalVectors >= current.vectorLimit) { 
-    const {data: customer} = await supabase.from('customers').select().eq("_id", _id).single();
+    const {data: customer} = await supabase.from('customers').select().eq("userId", _id).single();
     if (!customer || customer.plan !== 'plus') {
       // only throw this error if the customer is not on the self hosted plan
       quotaExceeded = true;
