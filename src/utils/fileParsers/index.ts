@@ -45,12 +45,10 @@ export async function parseFileData(req: NextApiRequest) {
   });
 
   const { fields, files } = formData;
-  console.log('form data is: ', formData)
 
   const fieldKeys = Object.keys(fields);
   fieldKeys.forEach((fieldKey) => fields[fieldKey] = fields[fieldKey][0]);
   if (fields.metadata) fields.metadata = JSON.parse(fields.metadata);
-  console.log('metadata is: ', fields.metadata)
   const fileType = fields.type;
   if (!fileType) throw "Missing file type";
 

@@ -62,9 +62,9 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       
       await addAnalyticsCount({analytics: userData.analytics})
       return res.status(200).send({data: data})
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({error: 'Could not fetch data'})
+    } catch (e) {
+      let toSend = typeof (e) === 'string' ? e : 'Unable to query data. Please contact support';
+      return res.status(500).json({error: toSend})
     }
     
   }

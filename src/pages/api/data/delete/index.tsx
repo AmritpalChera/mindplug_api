@@ -70,8 +70,8 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       return res.status(200).json({ success: true });
 
     } catch (e) {
-      console.log(e)
-      return res.status(500).json({ error: `unable to create index: ${e}` });
+      let toSend = typeof (e) === 'string' ? e : 'Unable to delete data. Please contact support';
+      return res.status(500).json({ error: toSend });
     }
     
   } else {

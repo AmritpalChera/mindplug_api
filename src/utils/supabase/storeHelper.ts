@@ -1,6 +1,6 @@
 import { addAnalyticsCount } from "../analytics/requestTracker";
 import supabase from "../setup/supabase";
-import { UserDataType } from "../types/types";
+import { CustomerProjectLimits, CustomerVectorLimits, UserDataType } from "../types/types";
 import { v4 as uuidv4 } from 'uuid';
 
 type UpdateSupabaseStoreType = {
@@ -20,8 +20,8 @@ type CheckStoreLimitsType = {
 }
 
 export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreLimitsType) => {
-  if (!userData.analytics.customPlan && userData.analytics.totalVectors + totalVectors > userData.analytics.vectorLimit) {
-    throw "Action exceeds plan quoto. Vector limit reached";
+  if (!userData.analytics.customPlan && userData.analytics.totalVectors + totalVectors > CustomerVectorLimits[userData.analytics.plan]) {
+    throw `Action exceeds plan quota. Requires ${totalVectors} vectors; limit reached`;
   }
   
 
@@ -31,7 +31,7 @@ export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreL
   let newProject = 0;
   if (proj.error) {
     newProject = 1;
-    if (!userData.analytics.customPlan && (userData.analytics.totalProjects + 1) > userData.analytics.projectLimit) {
+    if (!userData.analytics.customPlan && (userData.analytics.totalProjects + 1) > CustomerProjectLimits[userData.analytics.plan]) {
       throw "Action exceeeds plan quota. Project limit reached"
     }
   }

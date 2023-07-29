@@ -97,8 +97,8 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
       
     } catch (e) {
-      console.log("indexing error: ", e)
-      return res.status(500).json({error: e})
+      let toSend = typeof (e) === 'string' ? e : 'Unable to store data. Please contact support';
+      return res.status(500).json({error: toSend})
     }
     
   } else {

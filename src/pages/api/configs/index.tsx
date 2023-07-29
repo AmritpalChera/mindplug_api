@@ -4,7 +4,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, TypeOf } from "zod";
 import runMiddleware from '@/utils/setup/middleware';
-import { CustomerPlanAmounts } from '@/utils/types/types';
+import { CustomerPlanAmounts, CustomerPlans } from '@/utils/types/types';
 
 const bodySchema = object({
   db: string()
@@ -21,10 +21,10 @@ export default async function handler(req: FetchRequest, res: NextApiResponse) {
   res.json({
     pricings: {
       basic: {
-        amount: CustomerPlanAmounts.BASIC
+        amount: CustomerPlanAmounts[CustomerPlans.BASIC]
       },
       custom: {
-        amount: CustomerPlanAmounts.CUSTOM
+        amount: CustomerPlanAmounts[CustomerPlans.CUSTOM]
       }
     }
   })

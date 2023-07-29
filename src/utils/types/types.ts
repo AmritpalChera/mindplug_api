@@ -35,7 +35,19 @@ export const CustomerPlans = {
 }
 
 export const CustomerPlanAmounts = {
-  LITE: 0,
-  BASIC: 3000,
-  CUSTOM: 30000
+  [CustomerPlans.LITE]: 0,
+  [CustomerPlans.BASIC]: 3000,
+  [CustomerPlans.CUSTOM]: 30000
+}
+
+export const CustomerVectorLimits = {
+  [CustomerPlans.LITE]: 100,
+  [CustomerPlans.BASIC]: 3000,
+  [CustomerPlans.CUSTOM]: Infinity
+}
+
+export const CustomerProjectLimits = {
+  [CustomerPlans.LITE]: 1,
+  [CustomerPlans.BASIC]: 10,
+  [CustomerPlans.CUSTOM]: Infinity
 }

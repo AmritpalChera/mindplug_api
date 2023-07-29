@@ -114,8 +114,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
     } catch (e) {
-      console.log("indexing error: ", e)
-      return res.status(500).json({error: 'Unable to index data. Please contact support.'})
+      let toSend = typeof (e) === 'string' ? e : 'Unable to store data. Please contact support';
+      return res.status(500).json({error: toSend})
     }
     
   } else {

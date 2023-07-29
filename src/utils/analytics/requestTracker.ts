@@ -1,5 +1,5 @@
 import supabase from "../setup/supabase";
-import { CustomerPlans } from "../types/types";
+import { CustomerPlans, CustomerProjectLimits, CustomerVectorLimits } from "../types/types";
 
 type analyticsType = {
   totalProjects: number,
@@ -7,8 +7,7 @@ type analyticsType = {
   totalCollections: number,
   mindplugKey: string,
   totalRequests: number,
-  projectLimit: number,
-  vectorLimit: number
+  plan: string,
 }
 
 type analyticMetricsCount = {
@@ -55,7 +54,7 @@ export default async function requestLimiter(mindplugKey: string, _id: string) {
     }
     current = newData.data as analyticsType;
 
-  } else if (current.totalProjects >= current.projectLimit || current.totalVectors >= current.vectorLimit) { 
+  } else if (current && current.totalProjects >= CustomerProjectLimits[current.plan] || current.totalVectors >= CustomerVectorLimits[current.plan]) { 
     const {data: customer} = await supabase.from('customers').select().eq("userId", _id).single();
     if (!customer || customer.plan !== CustomerPlans.CUSTOM) {
       // only throw this error if the customer is not on the self hosted plan

@@ -1,6 +1,6 @@
 import stripe from "@/utils/setup/stripe";
 import supabase from "@/utils/setup/supabase";
-import { CustomerPlanAmounts } from "@/utils/types/types";
+import { CustomerPlanAmounts, CustomerPlans } from "@/utils/types/types";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // console.log('customer details: ', customer_details)
     // console.log('amount total: ', amount_total)
     // console.log('customer: ', customer);
-    const plan = amount_total === CustomerPlanAmounts.BASIC ? 'basic' : 'custom';
+    const plan = amount_total === CustomerPlanAmounts[CustomerPlans.BASIC] ?  CustomerPlans.BASIC : CustomerPlans.CUSTOM;
     
     const creation = await supabase.from('customers').upsert({
       userId: client_reference_id,
@@ -32,14 +32,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // No matter what they pay for now,the message limit increases to 1000
     // CHANGE LIMIT IN ANALYTICS PLAN
+    await supabase.from('analytics').update({plan}).eq('userId', client_reference_id);
   }
   else if (type === 'customer.subscription.deleted') {
     const { customer } = req.body?.data?.object;
     const userData: any = await stripe.customers.retrieve(customer);
     const email = userData?.email;
-    await supabase.from('customers').update({ amount: 0 }).eq('email', email);
+    const user = await supabase.from('customers').update({ amount: 0 }).eq('email', email).select('userId').single();
 
     // CHANGE LIMIT IN THE ANALYTICS PLAN
+    await supabase.from('analytics').update({
+      plan: CustomerPlans.LITE
+    }).eq('userId', user.data?.userId);
 
   } else if (type === 'customer.subscription.updated') {
     // TODO: update the amount for the subscription
