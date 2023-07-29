@@ -1,5 +1,6 @@
 import stripe from "@/utils/setup/stripe";
 import supabase from "@/utils/setup/supabase";
+import { CustomerPlanAmounts } from "@/utils/types/types";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // console.log('customer details: ', customer_details)
     // console.log('amount total: ', amount_total)
     // console.log('customer: ', customer);
-    const plan = amount_total === 2000 ? 'basic' : 'custom';
+    const plan = amount_total === CustomerPlanAmounts.BASIC ? 'basic' : 'custom';
     
     const creation = await supabase.from('customers').upsert({
       userId: client_reference_id,

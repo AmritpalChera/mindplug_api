@@ -33,3 +33,9 @@ export const CustomerPlans = {
   BASIC: 'basic',
   CUSTOM: 'custom'
 }
+
+export const CustomerPlanAmounts = {
+  LITE: 0,
+  BASIC: 3000,
+  CUSTOM: 30000
+}

@@ -1,4 +1,5 @@
 import supabase from "../setup/supabase";
+import { CustomerPlans } from "../types/types";
 
 type analyticsType = {
   totalProjects: number,
@@ -56,7 +57,7 @@ export default async function requestLimiter(mindplugKey: string, _id: string) {
 
   } else if (current.totalProjects >= current.projectLimit || current.totalVectors >= current.vectorLimit) { 
     const {data: customer} = await supabase.from('customers').select().eq("userId", _id).single();
-    if (!customer || customer.plan !== 'plus') {
+    if (!customer || customer.plan !== CustomerPlans.CUSTOM) {
       // only throw this error if the customer is not on the self hosted plan
       quotaExceeded = true;
       customPlan = false;
