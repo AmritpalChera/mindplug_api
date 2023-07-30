@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx playwright install --with-deps",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -28,7 +28,7 @@
     "next": "13.2.4",
     "openai": "^3.2.1",
     "pdf-parse": "^1.1.1",
-    "playwright": "^1.36.1",
+    "playwright-chromium": "1.11.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "stripe": "^12.2.0",
