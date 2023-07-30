@@ -84,6 +84,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         collection: collecName,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
+        customIndex: proj.data?.index
       });
 
       if (!upsertSuccess) {

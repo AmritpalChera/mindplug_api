@@ -46,9 +46,11 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { db } = req.body;
 
     try {
-      const pinecone = await initializePinecone(userData.pineconeKey, userData.pineconeEnv);
+      const database = await supabase.from('dbs').select('internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+      if (database.data?.internalStorage) userData.pineconeKey = '';
 
-      const index = pinecone.Index('mindplug');
+      const pinecone = await initializePinecone(userData.pineconeKey, userData.pineconeEnv);
+      const index = pinecone.Index(database.data?.index);
 
       const collections = await supabase.from('collections').select('collection, collectionId').eq('projectName', db).eq('userId', userData.userId);
       if (collections.error) {

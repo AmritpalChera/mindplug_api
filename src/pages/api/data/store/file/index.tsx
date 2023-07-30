@@ -96,6 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         collection: collecName,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
+        customIndex: proj.data?.index
       });
 
       if (!upsertSuccess) {

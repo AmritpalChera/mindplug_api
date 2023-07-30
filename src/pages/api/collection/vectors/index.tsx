@@ -65,9 +65,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       }
 
       const vectors = vectorsData.data.map((vectorDetail) => vectorDetail.vectorId);
+
+      const database = await supabase.from('dbs').select('internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+      if (database.data?.internalStorage) userData.pineconeKey = '';
+      
       
       const data = await queryVectors({
         vectorIds: vectors,
+        customIndex: database.data?.index,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
         namespace: `${db}-${collection}-${userData.userId}`,

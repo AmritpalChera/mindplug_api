@@ -26,8 +26,8 @@ export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreL
   
 
   // CHECK DB before upserting and check plan limits
-  const proj = await supabase.from('dbs').select('totalVectors, totalCollections').eq('userId', userData.userId).eq('projectName', db).single();
-
+  const proj = await supabase.from('dbs').select('totalVectors, totalCollections, internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+  
   let newProject = 0;
   if (proj.error) {
     newProject = 1;
@@ -35,6 +35,7 @@ export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreL
       throw "Action exceeeds plan quota. Project limit reached"
     }
   }
+  if (proj.data?.internalStorage  && !userData.analytics.customPlan) userData.pineconeEnv = '';
   return { proj, newProject };
 }
 
@@ -48,7 +49,7 @@ const updateSupabaseStore = async ({ db, userData, collection, proj, totalVector
   }
 
 
-  const project = await supabase.from("dbs").upsert({ lastUpdated: (new Date().toISOString()), projectName: db, userId: userData.userId, index: 'mindplug', totalVectors: (proj?.data?.totalVectors || 0 )+ totalVectors, totalCollections: (proj.data?.totalCollections || 0) + newCollection }).select().single();
+  const project = await supabase.from("dbs").upsert({ lastUpdated: (new Date().toISOString()), projectName: db, userId: userData.userId, index: 'mindplug', totalVectors: (proj?.data?.totalVectors || 0 )+ totalVectors, totalCollections: (proj.data?.totalCollections || 0) + newCollection, internalStorage: !userData.analytics.customPlan }).select().single();
   if (project.error) {
     console.log('project error: ', project.error)
     throw 'Could not update project in db'

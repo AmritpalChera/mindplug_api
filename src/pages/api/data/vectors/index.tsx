@@ -5,6 +5,7 @@ import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
 import queryVectors from '@/utils/pinecone/queryVectors';
 import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
+import supabase from '@/utils/setup/supabase';
 
 type Data = {
   data?: object,
@@ -46,11 +47,16 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
 
     try {
+      const database = await supabase.from('dbs').select('internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+      if (database.data?.internalStorage) userData.pineconeKey = '';
+      
+
       const data = await queryVectors({
         vectorIds: vectorIds,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
         namespace: `${db}-${collection}-${userData.userId}`,
+        customIndex: database.data?.index
       });
       
       await addAnalyticsCount({ analytics: userData.analytics });

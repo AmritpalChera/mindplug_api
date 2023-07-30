@@ -70,13 +70,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const collecName = `${db}-${collection}-${userData.userId}`;
       const totalVectors = pineconeVectors.length;
 
-      const { newProject, proj } = await checkStoreLimits({db, totalVectors, userData})
+      const { newProject, proj } = await checkStoreLimits({ db, totalVectors, userData });
   
       const upsertSuccess: boolean = await upsertData({
         vectors: pineconeVectors,
         collection: collecName,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
+        customIndex: proj.data?.index
       });
 
       if (!upsertSuccess) {
@@ -97,6 +98,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
       
     } catch (e) {
+      console.log('e is: ', e)
       let toSend = typeof (e) === 'string' ? e : 'Unable to store data. Please contact support';
       return res.status(500).json({error: toSend})
     }

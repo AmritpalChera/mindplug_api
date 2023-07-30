@@ -1,7 +1,7 @@
 import type { NextApiRequest } from 'next';
 import supabase from './setup/supabase';
 import requestLimiter from './analytics/requestTracker';
-import { UserDataType } from './types/types';
+import { CustomerPlans, UserDataType } from './types/types';
 
 // validates the token and returns a boolean
 export default async function authHandler(req: NextApiRequest) {
@@ -12,11 +12,6 @@ export default async function authHandler(req: NextApiRequest) {
   const { data, error } = await supabase.from('keys').select('mindplugKey, openaiKey, pineconeKey, pineconeEnv, userId, plan').eq('mindplugKey', token);
   if (error || !data || !data[0]) throw "Invalid authorization";
 
-  if (data[0].plan !== 'plus') {
-    data[0].openaiKey = null;
-    data[0].pineconeKey = null;
-    data[0].pineconeEnv = null;
-  }
 
   const analytics = await requestLimiter(token, data[0].userId);
   return {...data[0], analytics: analytics} as UserDataType;

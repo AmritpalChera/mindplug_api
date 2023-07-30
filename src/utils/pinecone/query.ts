@@ -7,7 +7,8 @@ type UpsertData = {
   numberResults?: number,
   customPineconeKey?: string,
   customPineconeEnv?: string,
-  metadataFilters?: any
+  metadataFilters?: any,
+  customIndex?: string
 }
 
 type Metadata = {
@@ -18,7 +19,7 @@ export default async function queryData(data: UpsertData) {
   const pinecone = await initializePinecone(data.customPineconeKey, data.customPineconeEnv);
 
   // retrieve index from pinecone
-  const index = pinecone.Index('mindplug');
+  const index = pinecone.Index((data.customIndex || 'mindplug'));
 
   // query to return the top 3 results
   const queryRequest = {

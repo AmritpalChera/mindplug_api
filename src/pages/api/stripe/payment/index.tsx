@@ -32,7 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // No matter what they pay for now,the message limit increases to 1000
     // CHANGE LIMIT IN ANALYTICS PLAN
-    await supabase.from('analytics').update({plan}).eq('userId', client_reference_id);
+    await supabase.from('analytics').update({ plan }).eq('userId', client_reference_id);
+    
+    // delete api keys for non custom plan
+    // await supabase.from('keys').update({ openaiKey: null, pineconeKey: null, pineconeEnv: null }).eq('userId', client_reference_id);
   }
   else if (type === 'customer.subscription.deleted') {
     const { customer } = req.body?.data?.object;

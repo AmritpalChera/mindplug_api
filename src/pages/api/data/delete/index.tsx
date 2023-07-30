@@ -47,9 +47,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const { db, collection, vectorIds } = req.body;
 
     try {
+
+      const database = await supabase.from('dbs').select('internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+      if (database.data?.internalStorage) userData.pineconeKey = '';
+      
+
       const pinecone = await initializePinecone(userData.pineconeKey, userData.pineconeEnv);
 
-      const index = pinecone.Index('mindplug');
+      const index = pinecone.Index(database.data?.index);
       await index.delete1({
         ids: vectorIds,
         namespace: `${db}-${collection}-${userData.userId}`

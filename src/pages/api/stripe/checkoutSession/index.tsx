@@ -2,7 +2,7 @@
 
 import runMiddleware from "@/utils/setup/middleware";
 import stripe from "@/utils/setup/stripe";
-import { CustomerPlans } from "@/utils/types/types";
+import { CustomerPlans, priceIds } from "@/utils/types/types";
 import { NextApiRequest, NextApiResponse } from "next";
 import { TypeOf, object, string } from "zod";
 
@@ -25,21 +25,11 @@ export default async function handler(req: CheckoutReq, res: NextApiResponse) {
   await runMiddleware(req, res);
   
   const priceString = req.body.priceId;
-  let priceId: string = '';
-  if (development) {
-    if (priceString === CustomerPlans.BASIC) priceId = 'price_1NZ2T4JgAg8HpO3H6xU39IKb';
-    else if (priceString === CustomerPlans.CUSTOM) priceId = 'price_1NZ2TwJgAg8HpO3HNpwfDlP7';
-  } else {
-    if (priceString === CustomerPlans.BASIC) priceId = 'price_1NZ5rGJgAg8HpO3Hyusyoi2m';
-    else if (priceString === CustomerPlans.CUSTOM) priceId = 'price_1NZ5s1JgAg8HpO3HSgpPDVAj';
-  }
-
-  if (!priceId) return res.status(403).send({error: 'Invalid price id'})
   const session = await stripe.checkout.sessions.create({
     billing_address_collection: 'auto',
     line_items: [
       {
-        price: priceId,
+        price: priceIds[priceString],
         // For metered billing, do not pass quantity
         quantity: 1,
       },

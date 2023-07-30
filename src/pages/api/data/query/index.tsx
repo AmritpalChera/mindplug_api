@@ -7,6 +7,7 @@ import queryData from '@/utils/pinecone/query';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
 import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
+import supabase from '@/utils/setup/supabase';
 
 type Data = {
   data?: object,
@@ -51,13 +52,18 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const embeds: EmbedType[] = await embeddingGenerator({ content: [search] });
 
     try {
+      const database = await supabase.from('dbs').select('internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
+      if (database.data?.internalStorage) userData.pineconeKey = '';
+      
+
       const data = await queryData({
         search: embeds[0].embedding,
         collection: `${db}-${collection}-${userData.userId}`,
         numberResults: count,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
-        metadataFilters: metaDataFilters
+        metadataFilters: metaDataFilters,
+        customIndex: database.data?.index
       });
       
       await addAnalyticsCount({analytics: userData.analytics})

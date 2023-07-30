@@ -15,37 +15,41 @@ type UpsertData = {
   collection: string | undefined,
   customPineconeKey?: string,
   customPineconeEnv?: string,
+  customIndex?: string
 }
 
-const checkMindplugIndex = async (pinecone: any) => {
+const checkMindplugIndex = async (pinecone: any, index: string) => {
   let log = ``;
   const pineconeIndices = await pinecone.listIndexes();
-  log += `Total projects: ${pineconeIndices.length}\n
-    ${pineconeIndices.map((ind: string, key: number) => `${key+1}. ${ind}\n`)}
-  `;
 
-  if (!pineconeIndices.includes('mindplug')) {
-    log += `\nNo mindplug index found, creating new index`;
+  if (!pineconeIndices.includes(index)) {
     await pinecone.createIndex({
       createRequest: {
-        name: 'mindplug',
+        name: index,
         dimension: 1536
       }
     }).catch((err: any) => {
-      log += 'Could not create index, please review pinecone plan. Delete existing indicies.'
-      throw new Error(log);
+      log += `Could not create index, please review pinecone plan. Delete existing indicies. Found "${pineconeIndices[0]}"`
+      throw log;
     });
+    const pineconeIndex = await pinecone.listIndexes();
+    if (!pineconeIndex.includes(index)) {
+      throw `Could not create index. Please create index "mindplug" manually`
+    }
   }
 }
 
 export default async function upsertData(data: UpsertData) {
-  const pinecone = await initializePinecone();
+  const pinecone = await initializePinecone(data.customPineconeKey, data.customPineconeEnv).catch(err => {
+    throw "Could not initialize pinecone";
+  });
 
-  await checkMindplugIndex(pinecone);
+
+  await checkMindplugIndex(pinecone, (data.customIndex || 'mindplug'));
 
 
   // retrieve index from pinecone
-  const index = pinecone.Index('mindplug');
+  const index = pinecone.Index((data.customIndex || 'mindplug'));
 
   // splice vectors into chunks
   const chunks = sliceIntoChunks(data.vectors, 10);
@@ -60,7 +64,10 @@ export default async function upsertData(data: UpsertData) {
         },
       });
     })
-  );
+  ).catch(err => {
+    console.log(err);
+    throw "Could not find index 'mindplug'. Please delete existing indicies"
+  });
   return true;
 }
 

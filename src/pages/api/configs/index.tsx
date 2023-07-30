@@ -4,7 +4,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, TypeOf } from "zod";
 import runMiddleware from '@/utils/setup/middleware';
-import { CustomerPlanAmounts, CustomerPlans } from '@/utils/types/types';
+import { CustomerPlanAmounts, CustomerPlans, CustomerProjectLimits, CustomerVectorLimits } from '@/utils/types/types';
 
 const bodySchema = object({
   db: string()
@@ -19,12 +19,21 @@ export default async function handler(req: FetchRequest, res: NextApiResponse) {
 
 
   res.json({
-    pricings: {
+    plans: {
+      lite: {
+        amount: CustomerPlanAmounts[CustomerPlans.LITE],
+        vectorLimit: CustomerVectorLimits[CustomerPlans.LITE],
+        projectLimit: CustomerProjectLimits[CustomerPlans.LITE]
+      },
       basic: {
-        amount: CustomerPlanAmounts[CustomerPlans.BASIC]
+        amount: CustomerPlanAmounts[CustomerPlans.BASIC],
+        vectorLimit: CustomerVectorLimits[CustomerPlans.BASIC],
+        projectLimit: CustomerProjectLimits[CustomerPlans.BASIC]
       },
       custom: {
-        amount: CustomerPlanAmounts[CustomerPlans.CUSTOM]
+        amount: CustomerPlanAmounts[CustomerPlans.CUSTOM],
+        vectorLimit: CustomerVectorLimits[CustomerPlans.CUSTOM],
+        projectLimit: CustomerProjectLimits[CustomerPlans.CUSTOM]
       }
     }
   })
