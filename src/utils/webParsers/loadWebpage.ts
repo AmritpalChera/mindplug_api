@@ -1,4 +1,4 @@
-import { chromium } from "playwright-chromium";
+import { chromium } from 'playwright';
 
 const loadWebContent = async (url: string) => {
   const browser = await chromium.launch({headless: true}); 
