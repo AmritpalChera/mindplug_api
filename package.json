@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && playwright install-deps chromium",
+    "build": "next build && npx playwright install-deps",
     "start": "next start",
     "lint": "next lint"
   },
