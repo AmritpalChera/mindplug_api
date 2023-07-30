@@ -1,16 +1,26 @@
 import { chromium } from 'playwright';
+import {
+  PlaywrightWebBaseLoader,
+  Page,
+  Browser,
+} from "langchain/document_loaders/web/playwright";
 
 const loadWebContent = async (url: string) => {
-  const browser = await chromium.launch({headless: true}); 
-  const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' +
-  ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36', }); 
-  const page = await context.newPage(); 
-    // Navigate to a website 
-  await page.goto(url); 
-    // Do something on the website
+  // const browser = await chromium.launch(); 
+  // const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' +
+  // ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36', }); 
+  // const page = await context.newPage(); 
+  //   // Navigate to a website 
+  // await page.goto(url); 
+  //   // Do something on the website
+const loader = new PlaywrightWebBaseLoader(url);
+const docs = await loader.load();
+
+// raw HTML page content
+const textContents = docs[0].pageContent;
     // ... 
-  const textContents = await page.innerText('body');
-  await browser.close(); 
+  // const textContents = await page.innerText('body');
+  // await browser.close(); 
   return textContents.replace(/[\r\n]+/gm, " ");
 }
 
