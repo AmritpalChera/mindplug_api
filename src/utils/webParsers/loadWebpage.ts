@@ -1,6 +1,6 @@
 import axios from 'axios';
-const { chromium } = require('playwright-core');
-const bundledChromium = require('chrome-aws-lambda');
+import { chromium } from 'playwright-core';
+import bundledChromium from 'chrome-aws-lambda';
 
 
 const loadWebContent = async (url: string) => {
