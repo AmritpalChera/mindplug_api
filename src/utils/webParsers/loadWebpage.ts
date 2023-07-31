@@ -4,7 +4,7 @@ const loadWebContent = async (url: string) => {
     headers: {
       "Content-Type": "application/json"
     }
-  })
+  }).then(res => res.data);
   return textContents;
 }
 

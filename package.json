@@ -34,9 +34,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/audiobuffer-to-wav": "^1.0.2",
     "@types/cors": "^2.8.13",
-    "@types/fluent-ffmpeg": "^2.1.21",
     "@types/formidable": "^3.4.0",
     "@types/uuid": "^9.0.1"
   }
