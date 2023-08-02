@@ -43,6 +43,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     //parse request
     const result = bodySchema.safeParse(req.body);
     if (!result.success) {
+      console.log('result is: ', result)
       return res.status(400).send({ error: 'Invalid request parameters' });
     }
 

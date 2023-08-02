@@ -20,7 +20,7 @@ const bodySchema = object({
   collection: string(),
   content: string(),
   db: string(),
-  metadata: record(any()),
+  metadata: record(any()).optional(),
   chunkSize: number().optional(),
   vectorId: string().optional(), // you can only update one vector at a time (for now)
 })
@@ -48,7 +48,11 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     //parse request
     const result = bodySchema.safeParse(req.body);
-    if (!result.success) return res.status(400).send({error: result.error});
+
+    if (!result.success) {
+      console.log(result.error)
+      return res.status(400).send({ error: result.error });
+    }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
     const { collection, db, chunkSize, metadata, vectorId, content } = req.body;
