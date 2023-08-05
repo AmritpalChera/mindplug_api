@@ -3,8 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
-import googleSearch, { googleSearchStrict } from '@/utils/setup/google';
-import formatResponse from '@/utils/webFormat/google';
+import searchWeb from '@/utils/webParsers/searchWeb';
 
 type Data = {
   data?: object,
@@ -12,7 +11,7 @@ type Data = {
 }
 
 const bodySchema = object({
-  input: string()
+  search: string()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -37,20 +36,12 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const result = bodySchema.safeParse(req.body);
     if (!result.success) return res.status(400).send({error: 'Invalid request parameters'});
 
-    const { input } = req.body;
+    const { search } = req.body;
 
     try {
-      const data = await googleSearch.get(input).then(res => res?.data).catch(async err => {
-        const strictData = await googleSearchStrict.get(input).then(res => res?.data).catch(err => {
-          console.log(err.response.data); 
-          throw "Unable to generate"
-        });
-        return strictData
-      });
+      const content = await searchWeb(search)
 
-      const toReturn = formatResponse(data);
-
-      res.json({ data: toReturn });
+      res.json(content);
 
     } catch (e) {
       console.log(e)

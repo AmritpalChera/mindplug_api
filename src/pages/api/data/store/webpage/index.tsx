@@ -8,7 +8,7 @@ import upsertData from '@/utils/pinecone/upsert';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
 import updateSupabaseStore, { checkStoreLimits } from '@/utils/supabase/storeHelper';
-import loadWebContent from '@/utils/webParsers/loadWebpage';
+import loadWebpage from '@/utils/webParsers/loadWebpage';
 
 type Data = {
   data?: object,
@@ -56,7 +56,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     // id should match the id in the supabase database
     let content: string = '';
     try {
-      content = await loadWebContent(url);
+      content = await loadWebpage(url);
     } catch (e) {
       console.log('could not get web content: ', e);
       return res.status(403).send({ error: 'Could not get content from URL.' });
