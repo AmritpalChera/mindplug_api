@@ -18,7 +18,7 @@ const formatItem = (item: any) => {
   let toReturn = {
     image: (item.pagemap?.imageobject && item.pagemap.imageobject[0].url) || (item.pagemap?.cse_image && item.pagemap?.cse_image[0].src) || item.pagemap?.metatags[0]["og:image"],
     title: item.title,
-    url: item.formattedUrl,
+    url: item.link,
     description: item.htmlSnippet,
     isVideo: !!item.pagemap?.videoobject
   };
