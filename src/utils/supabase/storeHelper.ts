@@ -10,7 +10,8 @@ type UpdateSupabaseStoreType = {
   proj: any,
   totalVectors: number,
   upsertedIds: string[],
-  newProject: number
+  newProject: number,
+  uploadId: string
 }
 
 type CheckStoreLimitsType = {
@@ -39,7 +40,7 @@ export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreL
   return { proj, newProject };
 }
 
-const updateSupabaseStore = async ({ db, userData, collection, proj, totalVectors, upsertedIds, newProject }: UpdateSupabaseStoreType) => {
+const updateSupabaseStore = async ({ db, userData, collection, proj, totalVectors, upsertedIds, newProject, uploadId }: UpdateSupabaseStoreType) => {
   
   // add the namespace as a collection to user data if it doesn't already exist
   const prevCollec = await supabase.from('collections').select('totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
@@ -60,7 +61,6 @@ const updateSupabaseStore = async ({ db, userData, collection, proj, totalVector
     console.log('could not upsert vectors in supabase: ', upserted.error)
   }
 
-  const uploadId = uuidv4(); //upload id
   await Promise.all(upsertedIds.map((id) => {
     return supabase.from('vectors').upsert({ vectorId: id, collectionId: upserted.data?.collectionId, uploadId: uploadId})
   }));

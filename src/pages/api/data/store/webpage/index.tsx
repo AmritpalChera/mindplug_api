@@ -9,6 +9,7 @@ import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
 import updateSupabaseStore, { checkStoreLimits } from '@/utils/supabase/storeHelper';
 import loadWebpage from '@/utils/webParsers/loadWebpage';
+import { v4 as uuidv4 } from 'uuid';
 
 type Data = {
   data?: object,
@@ -64,7 +65,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     
 
     try {
-
+      const uploadId = uuidv4(); //upload id
       const embeds: EmbedType[] | null = await embeddingGenerator({ content: [content], chunkSize: chunkSize, customKey: userData.openaiKey }).catch((err) => {
         return null
       });
@@ -73,7 +74,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         throw `Could not generate embeddings. ${userData.analytics.customPlan && 'Please check your openai key in settings.'} Please contact support if needed`;
       }
 
-      const pineconeVectors = generateVector({ data: embeds }, metadata, vectorId);
+      const pineconeVectors = generateVector({ data: embeds }, uploadId, metadata, vectorId);
       const collecName = `${db}-${collection}-${userData.userId}`;
       const totalVectors = pineconeVectors.length;
 
@@ -94,12 +95,13 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const upsertedIds = pineconeVectors.map(vec => vec.id);
 
       // UPDATE DB, related collection and vector tables
-      await updateSupabaseStore({ db, collection, userData, upsertedIds, newProject, totalVectors, proj });
+      await updateSupabaseStore({ db, collection, userData, upsertedIds, newProject, totalVectors, proj, uploadId });
 
       return res.status(200).json({
         data: {
           success: upsertSuccess,
-          vectorIds: upsertedIds
+          vectorIds: upsertedIds,
+          uploadId: uploadId
         }
       });
 

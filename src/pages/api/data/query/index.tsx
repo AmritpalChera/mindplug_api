@@ -19,7 +19,7 @@ const bodySchema = object({
   search: string(),
   collection: (string().optional()),
   count: number().optional(),
-  metaDataFilters: any().optional(),
+  metadataFilters: any().optional(),
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -43,12 +43,12 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     //parse request
     const result = bodySchema.safeParse(req.body);
     if (!result.success) {
-      console.log('result is: ', result)
+      console.log('error with data types: ', result)
       return res.status(400).send({ error: 'Invalid request parameters' });
     }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { db, search, collection, count, metaDataFilters } = req.body;
+    const { db, search, collection, count, metadataFilters } = req.body;
 
     const embeds: EmbedType[] = await embeddingGenerator({ content: [search] });
 
@@ -63,7 +63,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         numberResults: count,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
-        metadataFilters: metaDataFilters,
+        metadataFilters: metadataFilters,
         customIndex: database.data?.index
       });
       

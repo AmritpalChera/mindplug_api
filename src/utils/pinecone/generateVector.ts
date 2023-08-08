@@ -6,19 +6,22 @@ type embeddingType = {
   data: EmbedType[];
 }
 
-export default function generateVector(embeddingsData: embeddingType, metadata?: any, vectorId?: any) {
+export default function generateVector(embeddingsData: embeddingType, uploadId: string, metadata?: any, vectorId?: any) {
   const { data } = embeddingsData;
+  let vectorIdUsed = false;
   let pineconeNormalized = data.map((embedding) => {
+    let uniqueId = uuidv4();
+    if (vectorId && !vectorIdUsed) uniqueId = vectorId; 
     return {
-      id: vectorId || uuidv4(),
+      id: uniqueId,
       values: embedding.embedding,
       metadata: {
         ...metadata,
         ...embedding.metadata,
-        content: embedding.content
+        content: embedding.content,
+        uploadId: uploadId
       }
     }
   });
-  if (pineconeNormalized.length > 1 && vectorId) throw new Error('Too much content for one vector');
   return pineconeNormalized;
 }

@@ -49,6 +49,7 @@ export async function parseFileData(req: NextApiRequest) {
   const fieldKeys = Object.keys(fields);
   fieldKeys.forEach((fieldKey) => fields[fieldKey] = fields[fieldKey][0]);
   if (fields.metadata) fields.metadata = JSON.parse(fields.metadata);
+  if (fields.chunkSize) fields.chunkSize = parseInt(fields.chunkSize);
   const fileType = fields.type;
   if (!fileType) throw "Missing file type";
 
