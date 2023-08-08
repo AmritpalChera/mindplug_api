@@ -51,7 +51,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const userCollection = await supabase.from('collections').select('collectionId, totalVectors').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
 
       if (userCollection.error) {
-        console.log('user collection: ', userCollection.error)
+        console.log('user collection error: ', userCollection.error)
         res.status(500).send({ error: 'Could not find collection in DB' });
         return;
       }

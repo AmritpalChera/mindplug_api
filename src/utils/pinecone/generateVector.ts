@@ -16,7 +16,7 @@ export default function generateVector(embeddingsData: embeddingType, uploadId: 
       id: uniqueId,
       values: embedding.embedding,
       metadata: {
-        ...metadata,
+        ...(metadata || {}),
         ...embedding.metadata,
         content: embedding.content,
         uploadId: uploadId

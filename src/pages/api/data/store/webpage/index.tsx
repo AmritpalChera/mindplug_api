@@ -20,7 +20,7 @@ const bodySchema = object({
   collection: string(),
   url: string(),
   db: string(),
-  metadata: record(any()),
+  metadata: record(any()).optional(),
   chunkSize: number().optional(),
   vectorId: string().optional(), // you can only update one vector at a time (for now)
 })

@@ -28,7 +28,7 @@ type Data = {
 const bodySchema = object({
   collection: string().optional(),
   db: string(),
-  metadata: record(any()),
+  metadata: record(any()).optional(),
   chunkSize: number().optional(),
   type: string().optional(),
 })
