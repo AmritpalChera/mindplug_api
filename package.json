@@ -15,6 +15,7 @@
     "@types/react": "18.0.29",
     "@types/react-dom": "18.0.11",
     "@vercel/analytics": "^0.1.11",
+    "@vercel/blob": "^0.10.0",
     "axios": "^1.4.0",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.5",
