@@ -1,4 +1,5 @@
 import authHandler from '@/utils/authHandler';
+import runMiddleware from '@/utils/setup/middleware';
 import { handleBlobUpload, type HandleBlobUploadBody } from '@vercel/blob';
 import type { NextApiResponse, NextApiRequest } from 'next';
  
@@ -6,7 +7,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const body = (await req.body()) as HandleBlobUploadBody;
+  await runMiddleware(req, res);
+  const body = (req.body) as HandleBlobUploadBody;
  
   try {
     const jsonResponse = await handleBlobUpload({

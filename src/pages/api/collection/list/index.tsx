@@ -25,7 +25,6 @@ interface FetchRequest extends NextApiRequest {
 export default async function handler(req: FetchRequest, res: NextApiResponse<Data>) {
   await runMiddleware(req, res);
 
-
   if (req.method === 'POST') {
 
     // Extract token
