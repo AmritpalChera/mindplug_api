@@ -1,4 +1,5 @@
 
+import { Document } from "langchain/dist/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 
@@ -12,7 +13,7 @@ export default async function chunkRawData(content: string[], chunkSize?: number
   return chunks;
 }
 
-export const chunkDocuments = async (documents: any, chunkSize?: number) => {
+export const chunkDocuments = async (documents: Document[], chunkSize?: number) => {
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: chunkSize || 1024,
     chunkOverlap: chunkSize? Math.round(chunkSize/20) : 70,

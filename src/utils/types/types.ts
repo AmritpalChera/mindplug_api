@@ -5,7 +5,8 @@ export type EmbedType = {
   embedding: number[],
   metadata?: {
     pageNumber?: number,
-    totalPages?: number
+    totalPages?: number,
+    [key: string]: any
   }
 }
 
@@ -13,7 +14,8 @@ export type FileContentType = {
   pageContent: string,
   metadata: {
     pageNumber?: number,
-    totalPages?: number
+    totalPages?: number,
+    [key: string]: any
   }
 };
 

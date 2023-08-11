@@ -62,11 +62,48 @@ export async function embeddingGeneratorFile({ content, chunkSize, customKey }: 
     const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));
 
     return {
-      content: chunk.pageContent, embedding: embedding?.data?.data[0].embedding,
+      content: chunk.pageContent,
+      embedding: embedding?.data?.data[0].embedding,
       metadata: {
         pageNumber: chunk.metadata?.pageNumber,
         totalPages: chunk.metadata?.totalPages
       }
+    } as EmbedType;
+  }));
+
+  return chunkEmbeddings;
+    
+}
+
+type MultiContent = {
+  data: {
+    pageContent: string,
+    metadata: {
+      [key: string]: any
+    }
+  }[];
+  chunkSize?: number,
+  customKey?: string
+}
+export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: MultiContent) {
+  const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
+
+  const chunks = await chunkDocuments(data, chunkSize);
+  // console.log(response.data);
+
+  let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
+
+    const openaiEmbedder = () => openai.createEmbedding({
+      model: 'text-embedding-ada-002',
+      input: chunk.pageContent
+    });
+
+    const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));
+    delete chunk.metadata.loc;
+    return {
+      content: chunk.pageContent,
+      embedding: embedding?.data?.data[0].embedding,
+      metadata: chunk.metadata
     } as EmbedType;
   }));
 
