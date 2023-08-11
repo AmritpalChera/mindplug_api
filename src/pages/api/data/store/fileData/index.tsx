@@ -1,32 +1,19 @@
-import authHandler from '@/utils/authHandler';
-import runMiddleware from '@/utils/setup/middleware';
 import { handleBlobUpload, type HandleBlobUploadBody } from '@vercel/blob';
-import type { NextApiResponse, NextApiRequest } from 'next';
+import { NextResponse } from 'next/server';
  
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  await runMiddleware(req, res);
-  const body = (req.body) as HandleBlobUploadBody;
+export async function POST(request: Request): Promise<NextResponse> {
+  const body = (await request.json()) as HandleBlobUploadBody;
  
   try {
     const jsonResponse = await handleBlobUpload({
       body,
-      request: req,
+      request,
       onBeforeGenerateToken: async (pathname) => {
         // Generate a client token for the browser to upload the file
-        let userData;
-        try {
-          userData = await authHandler(req);
-        } catch (e: any) {
-          console.log('there is an error: ', e);
-          throw new Error('Could not get user data');
-        }
-        if (!userData) throw new Error('Invalid Auth');
+ 
         // ⚠️ Authenticate users before reaching this point.
         // Otherwise, you're allowing anonymous uploads.
-        // const { user, userCanUpload } = await auth(req, pathname);
+        // const { user, userCanUpload } = await auth(request, pathname);
         // if (!userCanUpload) {
         //   throw new Error('not authenticated or bad pathname');
         // }
@@ -35,8 +22,7 @@ export default async function handler(
           allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif'],
           metadata: JSON.stringify({
             // optional, sent to your server on upload completion
-            userId: userData.userId,
-
+            userId: "123",
           }),
         };
       },
@@ -44,7 +30,8 @@ export default async function handler(
         // Get notified of browser upload completion
         // ⚠️ This will not work on `localhost` websites,
         // Use ngrok or similar to get the full upload flow
-        console.log('blob upload completed', blob, metadata, body);
+ 
+        console.log('blob upload completed', blob, metadata);
  
         try {
           // Run any logic after the file upload completed
@@ -56,9 +43,11 @@ export default async function handler(
       },
     });
  
-    return res.status(200).json(jsonResponse);
+    return NextResponse.json(jsonResponse);
   } catch (error) {
-    // The webhook will retry 5 times waiting for a 200
-    return res.status(400).json({ error: (error as Error).message });
+    return NextResponse.json(
+      { error: (error as Error).message },
+      { status: 400 }, // The webhook will retry 5 times waiting for a 200
+    );
   }
 }
