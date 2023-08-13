@@ -95,7 +95,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       const upsertedIds = pineconeVectors.map(vec => vec.id);
 
       // UPDATE DB, related collection and vector tables
-      await updateSupabaseStore({ db, collection, userData, upsertedIds, newProject, totalVectors, proj, uploadId });
+      await updateSupabaseStore({ db, collection, userData, upsertedIds, newProject, totalVectors, proj, uploadId, url });
 
       return res.status(200).json({
         data: {
