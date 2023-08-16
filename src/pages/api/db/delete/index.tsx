@@ -64,6 +64,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
           namespace: `${db}-${collection.collection}-${userData.userId}`
         });
         await supabase.from('vectors').delete().eq('collectionId', collection.collectionId);
+        await supabase.from('chatbot').delete().eq('userId', userData.userId).eq('db', db).eq('collection', collection.collection);
       }));
 
       // now delete the project and all collections associated with this project in sb

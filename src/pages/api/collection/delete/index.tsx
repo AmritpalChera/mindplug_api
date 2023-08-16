@@ -70,6 +70,10 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         if (deleted.error) {
           console.log('could not delete vectors: ', deleted.error)
         }
+
+        // delete any chatbots for the collection
+        await supabase.from('chatbot').delete().eq('userId', userData.userId).eq('db', db).eq('collection', collection);
+
         await subtractAnalyticsCount({totalCollections: 1, totalProjects: 0, totalVectors: deleted.data!.length, analytics: userData.analytics})
       } else {
         console.log('could not delte collection: ', delCollec.error)

@@ -10,6 +10,7 @@ import runMiddleware from '@/utils/setup/middleware';
 import updateSupabaseStore, { checkStoreLimits } from '@/utils/supabase/storeHelper';
 import loadWebpage from '@/utils/webParsers/loadWebpage';
 import { v4 as uuidv4 } from 'uuid';
+import { reportError } from '@/utils/setup/mixpanel';
 
 type Data = {
   data?: object,
@@ -74,7 +75,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         throw `Could not generate embeddings. ${userData.analytics.customPlan && 'Please check your openai key in settings.'} Please contact support if needed`;
       }
 
-      const pineconeVectors = generateVector({ data: embeds }, uploadId, metadata, vectorId);
+      const pineconeVectors = generateVector({ data: embeds, uploadId, metadata, vectorId, url } );
       const collecName = `${db}-${collection}-${userData.userId}`;
       const totalVectors = pineconeVectors.length;
 
@@ -85,7 +86,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         collection: collecName,
         customPineconeKey: userData.pineconeKey,
         customPineconeEnv: userData.pineconeEnv,
-        customIndex: proj.data?.index
+        customIndex: proj.data?.index,
       });
 
       if (!upsertSuccess) {
@@ -107,7 +108,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
       
     } catch (e) {
-      console.log("indexing error: ", e)
+      reportError(userData.userId, e);
       return res.status(500).json({error: e})
     }
     

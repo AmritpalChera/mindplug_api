@@ -4,10 +4,14 @@ import { EmbedType } from '../types/types';
 
 type embeddingType = {
   data: EmbedType[];
+  uploadId: string,
+  metadata?: any,
+  vectorId?: string,
+  url?: string
 }
 
-export default function generateVector(embeddingsData: embeddingType, uploadId: string, metadata?: any, vectorId?: any) {
-  const { data } = embeddingsData;
+export default function generateVector(embeddingsData: embeddingType) {
+  const { data, uploadId, metadata, vectorId, url } = embeddingsData;
   let vectorIdUsed = false;
   let pineconeNormalized = data.map((embedding) => {
     let uniqueId = uuidv4();
@@ -19,7 +23,8 @@ export default function generateVector(embeddingsData: embeddingType, uploadId: 
         ...(metadata || {}),
         ...embedding.metadata,
         content: embedding.content,
-        uploadId: uploadId
+        uploadId: uploadId,
+        url: url
       }
     }
   });
