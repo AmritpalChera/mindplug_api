@@ -87,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         throw `Could not generate embeddings. ${userData.openaiKey && 'Please check your openai key in settings.'} Please contact support if needed`;
       }
 
-      const pineconeVectors = generateVector({ data: embeds }, uploadId, metadata);
+      const pineconeVectors = generateVector({ data: embeds, uploadId, metadata });
       const collecName = `${db}-${collection}-${userData.userId}`;
 
       const totalVectors = pineconeVectors.length;

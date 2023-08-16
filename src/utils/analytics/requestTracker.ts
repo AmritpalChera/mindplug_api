@@ -15,7 +15,6 @@ type analyticMetricsCount = {
   totalVectors?: number,
   totalCollections?: number,
   analytics: analyticsType,
-  url?: string
 }
 
 export interface LimiterType extends analyticsType {
