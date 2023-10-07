@@ -66,7 +66,6 @@ export default async function upsertData(data: UpsertData) {
     })
   ).catch(err => {
     console.log(err);
-    throw "Could not find index 'mindplug'. Please delete existing indicies"
   });
   return true;
 }
