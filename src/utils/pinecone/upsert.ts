@@ -1,6 +1,7 @@
 import { Vector } from "@pinecone-database/pinecone";
 import initializePinecone from "../setup/pinecone";
 import supabase from "../setup/supabase";
+import Bottleneck from "bottleneck";
 
 // maximum of 2MB of vectors we can set, so we can chunk our vectors array if we are inserting more than 10 vectors vectors at a time.
 const sliceIntoChunks = (arr: Vector[], chunkSize: number) => {
@@ -9,6 +10,10 @@ const sliceIntoChunks = (arr: Vector[], chunkSize: number) => {
   );
 };
 
+
+const limiter = new Bottleneck({
+  minTime: 20
+});
 
 type UpsertData = {
   vectors: Vector [],
@@ -57,12 +62,12 @@ export default async function upsertData(data: UpsertData) {
   // upsert vectors and data
   await Promise.all(
     chunks.map(async (chunk) => {
-      return await index!.upsert({
+      return await limiter.schedule(() => index!.upsert({
         upsertRequest: {
           vectors: chunk as Vector[],
           namespace: data.collection,
         },
-      });
+      })); 
     })
   ).catch(err => {
     console.log(err);
