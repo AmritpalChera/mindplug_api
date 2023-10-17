@@ -27,6 +27,11 @@ const baseComp4 = (chatData: any) => {
 };
 
 
+const getResponse = async (toSend: any) => {
+  
+}
+
+
 
 type chatGptTypes = {
   noAI?: boolean,
@@ -65,6 +70,59 @@ const summarizeText = async ({ noAI, search, amountChars }: chatGptTypes) => {
     console.log('error is: ', e?.response?.data)
     throw "Could no create completion";
   };
+  
 };
+
+type oneLinerType = {
+  text: string,
+  instructions?: string
+}
+
+export const oneLiner = async ({text, instructions}: oneLinerType) => {
+  if (text.length > 600) throw "Text too long";
+  const systemTemplate = 'You are someone good with providing one liners for user content';
+  const toSend = [
+    { role: 'system', content: systemTemplate },
+    { role: 'user', content: `${text}. \n\n Give me a one liner for this text. ${instructions || ''}. Include no formatting`}
+  ];
+  try {
+    
+    let comp = await baseComp4(toSend).catch(err => {
+      return baseComp(toSend);
+    });
+
+    const compData = comp.data?.choices[0].message?.content?.trim();
+    return compData;
+  } catch (e:any) {
+    console.log('error is: ', e?.response?.data)
+    throw "Could no create completion";
+  };
+}
+
+type labelType = {
+  text: string,
+  number?: number
+}
+
+export const generateTags = async ({text, number = 1}: labelType) => {
+  if (text.length > 600) throw "Text too long";
+  const systemTemplate = 'You are someone good with generating tags for the given text';
+  const toSend = [
+    { role: 'system', content: systemTemplate },
+    { role: 'user', content: `${text}. \n\n Give me ${number} tag on functionality. Seperate by comma`}
+  ];
+  try {
+    
+    let comp = await baseComp4(toSend).catch(err => {
+      return baseComp(toSend);
+    });
+
+    const compData = comp.data?.choices[0].message?.content?.trim();
+    return compData;
+  } catch (e:any) {
+    console.log('error is: ', e?.response?.data)
+    throw "Could no create completion";
+  };
+}
 
 export default summarizeText;
