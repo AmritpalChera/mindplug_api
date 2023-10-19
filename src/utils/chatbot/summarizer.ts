@@ -125,4 +125,30 @@ export const generateTags = async ({text, number = 1}: labelType) => {
   };
 }
 
+type GenerateTweetType = {
+  text: string,
+  tone?: string
+}
+
+export const generateTweet = async ({ text, tone = "funny" }: GenerateTweetType) => {
+  if (text.length > 600) throw "Text too long";
+  const systemTemplate = 'You are someone good with generating tweets for the given text';
+  const toSend = [
+    { role: 'system', content: systemTemplate },
+    { role: 'user', content: `${text}. \n\n Give me a tweet from the given description in tone: ${tone}. Use minimum words`}
+  ];
+  try {
+    
+    let comp = await baseComp4(toSend).catch(err => {
+      return baseComp(toSend);
+    });
+
+    const compData = comp.data?.choices[0].message?.content?.trim();
+    return compData;
+  } catch (e:any) {
+    console.log('error is: ', e?.response?.data)
+    throw "Could no create completion";
+  };
+}
+
 export default summarizeText;

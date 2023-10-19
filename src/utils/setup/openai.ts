@@ -4,7 +4,7 @@ import { Configuration, OpenAIApi } from 'openai';
 
 export const limiterOpenai = new Bottleneck({
   maxConcurrent: 1,
-  minTime: 50
+  minTime: 100
 });
 
 

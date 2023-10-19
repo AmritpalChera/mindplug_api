@@ -4,7 +4,7 @@ import { object, string, number, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
 import loadWebpage from '@/utils/webParsers/loadWebpage';
-import summarizeText, { oneLiner } from '@/utils/chatbot/summarizer';
+import summarizeText, { generateTags, generateTweet, oneLiner } from '@/utils/chatbot/summarizer';
 
 type Data = {
   data?: any,
@@ -13,7 +13,7 @@ type Data = {
 
 const bodySchema = object({
   text: string(),
-  instructions: string().optional()
+  tone: string().optional()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -38,14 +38,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     const result = bodySchema.safeParse(req.body);
     if (!result.success) return res.status(400).send({error: 'Invalid request parameters'});
 
-    const { text, instructions } = req.body;
+    const { text, tone } = req.body;
 
     try {
-      const content = await oneLiner({ text, instructions });
+      const content = await generateTweet({ text, tone });
       res.json({data: content});
     } catch (e) {
       console.log(e)
-      return res.status(500).json({ error: `Unable to generate one liner` });
+      return res.status(500).json({ error: `Unable to generate tags` });
     }
 
   } else {

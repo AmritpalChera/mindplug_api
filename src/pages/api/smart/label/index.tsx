@@ -45,7 +45,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       res.json({data: content});
     } catch (e) {
       console.log(e)
-      return res.status(500).json({ error: `Unable to search web` });
+      return res.status(500).json({ error: `Unable to generate tags` });
     }
 
   } else {
