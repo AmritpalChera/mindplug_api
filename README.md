@@ -17,13 +17,13 @@ Our vision is to inspire people from around the world to be fascinated through t
 
 A very minor list of use-cases for using the Mindplug API include: 
 ```
-Long-term memory for conversational chat bots
-Searching books and manuals by meaning of query
-Searching customer databases
-Quickly parsing through information in videos
-Creating conversational chatbots for any website instantly.
-Generating long-term friends which develop personality over time.
-Generating AI customer support bots for your website
+1. Long-term memory for conversational chat bots
+2. Searching books and manuals by meaning of query
+3. Searching customer databases
+4. Quickly parsing through information in videos
+5. Creating conversational chatbots for any website instantly.
+6. Generating long-term friends which develop personality over time.
+7. Generating AI customer support bots for your website
 ```
 
 ## Minimizing costs for storing data 🪙
@@ -56,6 +56,44 @@ const mindplug = new Mindplug({mindplugKey: <SAMPLE KEY>});
 ```
 
 ### Store Data
+All storage of data requires a db and a collection.
+Store text. Requires content
+```
+mindplug.store({
+  db: "first database",
+  collection: "any collection",
+  content: "hello, sample text to store",
+});
+```
+
+Store PDF file. Requires an object of type File under 50MB
+```
+mindplug.storePDF({
+  db: "first database",
+  collection: "any collection",
+  file: <SAMPLE FILE>
+});
+```
+
+Store webpage. Requires the webpage url
+```
+mindplug.storeWeb({
+  db: "first database",
+  collection: "any collection",
+  url: "https://mindplug.io"
+});
+```
+
+Store audio. Requires a MP3 or WAV file under 20MB
+```
+// must pass an openaiKey to constructor
+mindplug.storeAudio({
+  db: "first database",
+  collection: "any collection",
+  file: <SAMPLE FILE> 
+});
+```
+
 
 
 Please see the full documentation [here](https://docs.mindplug.io/javascript-sdk).
@@ -67,13 +105,52 @@ Using the raw API ensures the fastest updates for new and existing endpoints. Al
 The documentation architecture:
 
 ### Setup
-API Setup - Base: Base instance for axios used to interact with text storage and web.
+[API Setup](https://docs.mindplug.io/api/api-setup-text) - Base: Base instance for axios used to interact with text storage and web.
 
-API Setup - PDFs: Base instance for axios used to interact with PDF files
+[API Setup](https://docs.mindplug.io/api/api-setup-pdfs) - PDFs: Base instance for axios used to interact with PDF files
 
-API Setup - Audio: Base instance for axios used to interact with audio
+[API Setup](https://docs.mindplug.io/api/api-setup-audio) - Audio: Base instance for axios used to interact with audio
 
-First, run the development server:
+
+### Storing data
+[Store basic text](https://docs.mindplug.io/api/storing-data): store basic text content given a string value.
+
+[Store PDF files](https://docs.mindplug.io/api/store-pdf): Requires an instance of axios to pass formData.
+
+[Store Webpage](https://docs.mindplug.io/api/store-web): Crawls the webpage and stores the text content. 
+
+### Query Data
+[By semantic search](https://docs.mindplug.io/api/query): To semantic search on stored data. Seach by meaning of text.
+
+[By vector ids](https://docs.mindplug.io/api/query-by-ids): Search specific vectors by their ids.
+
+[By collection](https://docs.mindplug.io/api/query-by-collection): Returns the recent 10 vectors from a given collection.
+
+### Delete Data
+[By vector ids](https://docs.mindplug.io/api/delete-by-ids): Delete specific data based on vector ids
+
+[By collection](https://docs.mindplug.io/api/delete-collection): Delete an entire collection, including all stored vectors within.
+
+[By project](https://docs.mindplug.io/api/delete-project): Delete an entire project, including all collections and vectors within.
+
+### List Data
+[List projects](https://docs.mindplug.io/api/list-projects): List all the projects you have on Mindplug
+
+[List collections](https://docs.mindplug.io/api/list-collections): List all the collections you have on Mindplug
+
+### Smart
+[Web search](https://docs.mindplug.io/api/search-web): Returns the top 3 google results from select resources
+
+There may be more endpoints not listed in this documentation. This repository is not actively maintained, however is still utilized by real-world users. 
+
+
+## Running the server
+Install dependencies 
+```
+yarn install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -83,28 +160,5 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+By default the server uses port 3000 of localhost, but if this is run in parallel with the frontend, this should run on port 3001.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# mindplug_api
