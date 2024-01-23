@@ -65,6 +65,9 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         customPineconeEnv: userData.pineconeEnv,
         metadataFilters: metadataFilters,
         customIndex: database.data?.index
+      }).catch(err => {
+        console.log('querying data failed');
+        return {};
       });
       
       await addAnalyticsCount({analytics: userData.analytics})

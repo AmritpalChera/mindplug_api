@@ -13,7 +13,7 @@ type embeddingType = {
 export default function generateVector(embeddingsData: embeddingType) {
   const { data, uploadId, metadata, vectorId, url } = embeddingsData;
   let vectorIdUsed = false;
-  let pineconeNormalized = data.map((embedding) => {
+  let pineconeNormalized = data.map((embedding, index) => {
     let uniqueId = uuidv4();
     if (vectorId && !vectorIdUsed) uniqueId = vectorId; 
     return {
@@ -24,7 +24,8 @@ export default function generateVector(embeddingsData: embeddingType) {
         ...embedding.metadata,
         content: embedding.content,
         uploadId: uploadId,
-        url: url
+        url: url,
+        vectorNumber: index
       }
     }
   });

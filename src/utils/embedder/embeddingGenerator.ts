@@ -27,6 +27,9 @@ export default async function embeddingGenerator({ content, chunkSize, customKey
     const openaiEmbedder = () => openai.createEmbedding({
       model: 'text-embedding-ada-002',
       input: chunk.pageContent
+    }).catch(err => {
+      console.log("err is: ", err.response.data)
+      console.log('could not create embedding');
     });
 
     const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));

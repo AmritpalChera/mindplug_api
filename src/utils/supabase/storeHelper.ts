@@ -99,8 +99,8 @@ const updateSupabaseStore = async ({ db, userData, collection, proj, totalVector
   
 
   // insert new vectors
-  await Promise.all(upsertedIds.map((id) => {
-    return supabase.from('vectors').upsert({ vectorId: id, collectionId: upserted.data?.collectionId, uploadId: uploadId})
+  await Promise.all(upsertedIds.map((id, index) => {
+    return supabase.from('vectors').upsert({ vectorId: id, collectionId: upserted.data?.collectionId, vectorNumber: index, uploadId: uploadId})
   }));
 
   
