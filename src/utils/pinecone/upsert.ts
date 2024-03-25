@@ -20,7 +20,7 @@ type UpsertData = {
   collection: string | undefined,
   customPineconeKey?: string,
   customPineconeEnv?: string,
-  customIndex?: string
+  customIndex?: string,
 }
 
 const checkMindplugIndex = async (pinecone: any, index: string) => {

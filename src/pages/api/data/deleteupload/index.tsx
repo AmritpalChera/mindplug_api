@@ -67,7 +67,14 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       });
 
       const prevCollec = await supabase.from('collections').select('totalVectors, collectionId').eq('projectName', db).eq('userId', userData.userId).eq('collection', collection).single();
-      await supabase.from('collections').update({ totalVectors: prevCollec.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('collection', collection).eq('projectName', db);
+      const totalVectors = prevCollec.data?.totalVectors - vectorIds.length;
+
+      // delete collection if there are 0 vectors left
+      if (totalVectors === 0) {
+        await supabase.from('collections').delete().eq('userId', userData.userId).eq('collection', collection).eq('projectName', db);
+      } else {
+        await supabase.from('collections').update({ totalVectors: prevCollec.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('collection', collection).eq('projectName', db);
+      }
       
       const proj = await supabase.from('dbs').select('totalVectors').eq('userId', userData.userId).eq('projectName', db).single();
       await supabase.from('dbs').update({ totalVectors: proj.data?.totalVectors - vectorIds.length }).eq('userId', userData.userId).eq('projectName', db);
