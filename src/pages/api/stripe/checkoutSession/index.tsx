@@ -7,7 +7,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { TypeOf, object, string } from "zod";
 
 const development = process.env.NODE_ENV === 'development';
-export const DOMAIN = development ? 'http://localhost:3000' : 'https://mindplug.io';
+export const DOMAIN = development ? 'http://localhost:9000' : 'https://mindplug.io';
 
 
 const bodySchema = object({
