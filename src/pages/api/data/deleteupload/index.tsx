@@ -7,7 +7,6 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
-import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean
@@ -45,6 +44,8 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
     const { db, collection, uploadId } = req.body;
+
+    console.log('deleting for: ', req.body);
 
     try {
 
@@ -84,7 +85,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       }))
 
       
-      await subtractAnalyticsCount({ totalVectors: vectorIds.length, analytics: userData.analytics });
       return res.status(200).json({ success: true });
 
     } catch (e) {

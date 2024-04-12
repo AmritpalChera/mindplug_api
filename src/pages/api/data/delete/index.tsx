@@ -7,7 +7,6 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
-import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean
@@ -70,8 +69,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         return await supabase.from('vectors').delete().eq('collectionId', prevCollec.data?.collectionId).eq('vectorId', id);
       }))
 
-      
-      await subtractAnalyticsCount({ totalVectors: vectorIds.length, analytics: userData.analytics });
+       
       return res.status(200).json({ success: true });
 
     } catch (e) {

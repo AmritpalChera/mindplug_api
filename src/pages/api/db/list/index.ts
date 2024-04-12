@@ -3,7 +3,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
-import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean,
@@ -41,7 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       }))
       
-      await addAnalyticsCount({analytics: userData.analytics})
       return res.status(200).json({ success: true, projects: toSend });
     } catch (e) {
       console.log('unable to list indecies: ', e);

@@ -6,7 +6,6 @@ import { object, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
 import supabase from '@/utils/setup/supabase';
 import runMiddleware from '@/utils/setup/middleware';
-import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   data?: any | null,
@@ -51,7 +50,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         res.status(500).send({ error: 'Could not get colelctions for db' });
         return;
       }
-      await addAnalyticsCount({ analytics: userData.analytics });
       return res.status(200).json({ data: userCollections.data, count: userCollections.data.length })
     } catch (e) {
       return res.status(500).send({error: 'Could not query collections'})

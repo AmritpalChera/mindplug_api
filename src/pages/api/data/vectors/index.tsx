@@ -4,7 +4,6 @@ import { object, string, TypeOf, array } from "zod";
 import authHandler from '@/utils/authHandler';
 import runMiddleware from '@/utils/setup/middleware';
 import queryVectors from '@/utils/pinecone/queryVectors';
-import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 import supabase from '@/utils/setup/supabase';
 
 type Data = {
@@ -59,7 +58,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         customIndex: database.data?.index
       });
       
-      await addAnalyticsCount({ analytics: userData.analytics });
       return res.status(200).send({data: data})
     } catch (err) {
       console.log(err);

@@ -1,4 +1,3 @@
-import { addAnalyticsCount } from "../analytics/requestTracker";
 import { reportError } from "../setup/mixpanel";
 import supabase from "../setup/supabase";
 import { CustomerProjectLimits, CustomerVectorLimits, UserDataType } from "../types/types";
@@ -29,11 +28,8 @@ type UpdateUrlType = {
   totalVectors: number
 }
 
-export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreLimitsType) => {
-  if (!userData.analytics.customPlan && userData.analytics.totalVectors + totalVectors > CustomerVectorLimits[userData.analytics.plan]) {
-    throw `Action exceeds plan quota. Requires ${totalVectors} vectors; limit reached`;
-  }
-  
+
+export const checkStoreLimits = async ({userData, db}: CheckStoreLimitsType) => {
 
   // CHECK DB before upserting and check plan limits
   const proj = await supabase.from('dbs').select('totalVectors, totalCollections, internalStorage, index').eq('userId', userData.userId).eq('projectName', db).single();
@@ -41,31 +37,9 @@ export const checkStoreLimits = async ({userData, totalVectors, db}: CheckStoreL
   let newProject = 0;
   if (proj.error) {
     newProject = 1;
-    if (!userData.analytics.customPlan && (userData.analytics.totalProjects + 1) > CustomerProjectLimits[userData.analytics.plan]) {
-      throw "Action exceeeds plan quota. Project limit reached"
-    }
   }
-  if (proj.data?.internalStorage  && !userData.analytics.customPlan) userData.pineconeEnv = '';
+
   return { proj, newProject };
-}
-
-const updateUrlRecord = async ({url, userData, uploadId, isUnique, totalVectors}: UpdateUrlType) => {
-  url = url.toLowerCase();
-  const hostname = new URL(url).hostname;
-  const hashedUrl = createHash('sha256').update(url).digest('hex');
-  if (!hashedUrl || !hostname) {
-    reportError(userData.userId, `Could not create hostname or hashedurl for url: ${url}`);
-  } else {
-    // update record with the same hash and store the new upload id.
-    const createNewRecord = await supabase.from('webVectors').upsert({ uploadId, urlHash: hashedUrl, url, hostUrl: hostname });
-
-    // delete previous vectors with the upload id
-
-    if (createNewRecord.error) {
-      reportError(userData.userId, createNewRecord.error, `Could not create new url record`)
-    }
-  }
-  return totalVectors;
 }
 
 const updateSupabaseStore = async ({ db, userData, collection, proj, totalVectors, upsertedIds, newProject, uploadId }: UpdateSupabaseStoreType) => {
@@ -85,7 +59,7 @@ const updateSupabaseStore = async ({ db, userData, collection, proj, totalVector
   //   totalVectors = await updateUrlRecord({ userData, url, uploadId, isUnique, totalVectors });
   // } 
 
-  const project = await supabase.from("dbs").upsert({ lastUpdated: now, projectName: db, userId: userData.userId, index: 'mindplug', totalVectors: (proj?.data?.totalVectors || 0 )+ totalVectors, totalCollections: (proj.data?.totalCollections || 0) + newCollection, internalStorage: !userData.analytics.customPlan }).select().single();
+  const project = await supabase.from("dbs").upsert({ lastUpdated: now, projectName: db, userId: userData.userId, index: 'mindplug', totalVectors: (proj?.data?.totalVectors || 0 )+ totalVectors, totalCollections: (proj.data?.totalCollections || 0) + newCollection }).select().single();
   if (project.error) {
     console.log('project error: ', project.error)
     throw 'Could not update project in db'
@@ -102,10 +76,6 @@ const updateSupabaseStore = async ({ db, userData, collection, proj, totalVector
   await Promise.all(upsertedIds.map((id, index) => {
     return supabase.from('vectors').upsert({ vectorId: id, collectionId: upserted.data?.collectionId, vectorNumber: index, uploadId: uploadId})
   }));
-
-  
-
-  await addAnalyticsCount({totalProjects: newProject, totalCollections: newCollection, totalVectors: totalVectors, analytics: userData.analytics})
 }
 
 export default updateSupabaseStore;

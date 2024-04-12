@@ -1,14 +1,15 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { any, array, number, object, record, string, TypeOf } from "zod";
+import { any, array, boolean, number, object, record, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import embeddingGenerator, { embeddingGeneratorMulti } from '@/utils/embedder/embeddingGenerator';
+import embeddingGenerator, { embeddingGeneratorMulti, smartEmbedderDocs } from '@/utils/embedder/embeddingGenerator';
 import generateVector from '@/utils/pinecone/generateVector';
 import upsertData from '@/utils/pinecone/upsert';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
 import updateSupabaseStore, { checkStoreLimits } from '@/utils/supabase/storeHelper';
 import { v4 as uuidv4 } from 'uuid';
+import { error } from 'console';
 
 type Data = {
   data?: object,
@@ -24,6 +25,7 @@ const bodySchema = object({
   db: string(),
   chunkSize: number().optional(),
   metadata: record(any()).optional(),
+  smartEmbedder: boolean().optional()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -56,19 +58,28 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { collection, db, chunkSize, data, metadata } = req.body;
-
+    const { collection, db, chunkSize, data, metadata, smartEmbedder } = req.body;
     // collection is an eq of namespace and content is the metadata of the embedidngs
     // id should match the id in the supabase database
 
     try {
       const uploadId = uuidv4(); //upload id
-      const embeds: EmbedType[] | null = await embeddingGeneratorMulti({ data, chunkSize: chunkSize, customKey: userData.openaiKey }).catch((err) => {
-        return null
-      });
+      let embeds: EmbedType[] | null = null;
+      if (smartEmbedder) {
+        embeds = await smartEmbedderDocs({ data, customKey: userData.openaiKey }).catch((err) => {
+          console.log('err is', err);
+          return null
+        });
+      } else {
+        embeds = await embeddingGeneratorMulti({ data, chunkSize: chunkSize, customKey: userData.openaiKey }).catch((err) => {
+          console.log('error is: ', err);
+          return null
+        });
+      }
+        
 
       if (!embeds) {
-        throw `Could not generate embeddings. ${userData.analytics.customPlan && 'Please check your openai key in settings.'} Please contact support if needed`;
+        throw `Could not generate embeddings. 'Please check your openai key in settings. Please contact support if needed`;
       }
 
       const pineconeVectors = generateVector({ data: embeds, uploadId, metadata });

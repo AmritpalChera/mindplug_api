@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     //parse request
     try {
-      const analyticsData = await supabase.from('analytics').select('totalRequests, totalProjects, totalVectors, totalCollections').eq('mindplugKey', userData.mindplugKey).single();
+      const analyticsData = await supabase.from('analytics').select('totalProjects, totalVectors, totalCollections').eq('mindplugKey', userData.mindplugKey).single();
       if (analyticsData.error) {
         return res.status(403).send({ error: 'Could not get analytics data' });
       }

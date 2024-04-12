@@ -11,10 +11,10 @@ export const limiterOpenai = new Bottleneck({
 });
 
 
-export default function initializeOpenai (key: string) {
-  const configuration = {
-    apiKey: key,
-  };
-  const openai = new OpenAI(configuration);
+export default function initializeAnyscale () {
+  const openai = new OpenAI({
+    apiKey: process.env.ANYSCALE_KEY,
+    baseURL: "https://api.endpoints.anyscale.com/v1"
+  });
   return openai;
 }

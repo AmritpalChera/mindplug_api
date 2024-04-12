@@ -6,7 +6,6 @@ import embeddingGenerator from '@/utils/embedder/embeddingGenerator';
 import queryData from '@/utils/pinecone/query';
 import { EmbedType } from '@/utils/types/types';
 import runMiddleware from '@/utils/setup/middleware';
-import { addAnalyticsCount } from '@/utils/analytics/requestTracker';
 import supabase from '@/utils/setup/supabase';
 
 type Data = {
@@ -70,7 +69,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         return {};
       });
       
-      await addAnalyticsCount({analytics: userData.analytics})
       return res.status(200).send({data: data})
     } catch (e) {
       let toSend = typeof (e) === 'string' ? e : 'Unable to query data. Please contact support';
