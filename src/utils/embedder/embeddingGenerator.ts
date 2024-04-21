@@ -1,7 +1,7 @@
 
 import initializeOpenai from "../setup/openai";
 import { EmbedType, FileContentType } from "../types/types";
-import chunkRawData, { chunkDocuments } from "./chunk";
+import chunkRawData, { chunkDocuments, smartChunkDocuments } from "./chunk";
 import Bottleneck from "bottleneck";
 
 
@@ -24,7 +24,7 @@ export default async function embeddingGenerator({ content, chunkSize, customKey
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
 
-    const openaiEmbedder = () => openai.createEmbedding({
+    const openaiEmbedder = () => openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: chunk.pageContent
     }).catch(err => {
@@ -34,7 +34,7 @@ export default async function embeddingGenerator({ content, chunkSize, customKey
 
     const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));
 
-    return { content: chunk.pageContent, embedding: embedding?.data?.data[0].embedding } as EmbedType;
+    return { content: chunk.pageContent, embedding: embedding?.data[0].embedding } as EmbedType;
   }));
 
   
@@ -57,7 +57,7 @@ export async function embeddingGeneratorFile({ content, chunkSize, customKey }: 
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
 
-    const openaiEmbedder = () => openai.createEmbedding({
+    const openaiEmbedder = () => openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: chunk.pageContent
     });
@@ -66,7 +66,7 @@ export async function embeddingGeneratorFile({ content, chunkSize, customKey }: 
 
     return {
       content: chunk.pageContent,
-      embedding: embedding?.data?.data[0].embedding,
+      embedding: embedding?.data[0].embedding,
       metadata: {
         pageNumber: chunk.metadata?.pageNumber,
         totalPages: chunk.metadata?.totalPages
@@ -92,11 +92,12 @@ export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: Mu
   const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
 
   const chunks = await chunkDocuments(data, chunkSize);
-  // console.log(response.data);
+
+  // const chunks = await smartChunkDocuments(data, openai);
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
 
-    const openaiEmbedder = () => openai.createEmbedding({
+    const openaiEmbedder = () => openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: chunk.pageContent
     });
@@ -105,7 +106,7 @@ export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: Mu
     delete chunk.metadata.loc;
     return {
       content: chunk.pageContent,
-      embedding: embedding?.data?.data[0].embedding,
+      embedding: embedding?.data[0].embedding,
       metadata: chunk.metadata
     } as EmbedType;
   }));
@@ -114,4 +115,31 @@ export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: Mu
 
   return chunkEmbeddings;
     
+}
+
+export async function smartEmbedderDocs({data, customKey}: MultiContent) {
+  const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
+
+  const chunks = await smartChunkDocuments(data, openai);
+  // return null;
+
+  let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
+
+    const openaiEmbedder = () => openai.embeddings.create({
+      model: 'text-embedding-ada-002',
+      input: chunk.pageContent
+    });
+
+    const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));
+    delete chunk.metadata.loc;
+    return {
+      content: chunk.pageContent,
+      embedding: embedding?.data[0].embedding,
+      metadata: chunk.metadata
+    } as EmbedType;
+  }));
+
+  
+
+  return chunkEmbeddings;
 }

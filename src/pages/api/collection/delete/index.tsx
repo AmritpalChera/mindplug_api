@@ -7,7 +7,6 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
-import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean,
@@ -74,7 +73,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
         // delete any chatbots for the collection
         await supabase.from('chatbot').delete().eq('userId', userData.userId).eq('db', db).eq('collection', collection);
 
-        await subtractAnalyticsCount({totalCollections: 1, totalProjects: 0, totalVectors: deleted.data!.length, analytics: userData.analytics})
       } else {
         console.log('could not delte collection: ', delCollec.error)
       }

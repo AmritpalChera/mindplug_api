@@ -7,7 +7,6 @@ import authHandler from '@/utils/authHandler';
 import initializePinecone from '@/utils/setup/pinecone';
 import runMiddleware from '@/utils/setup/middleware';
 import supabase from '@/utils/setup/supabase';
-import { subtractAnalyticsCount } from '@/utils/analytics/requestTracker';
 
 type Data = {
   success?: boolean
@@ -72,7 +71,6 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       
       await supabase.from('collections').delete().eq('userId', userData.userId).eq('projectName', db);
       const deletedProject = await supabase.from('dbs').delete().eq('userId', userData.userId).eq('projectName', db).select('totalVectors, totalCollections').single();
-      await subtractAnalyticsCount({ totalCollections: deletedProject.data?.totalCollections, totalVectors: deletedProject.data?.totalVectors, totalProjects: 1, analytics: userData.analytics });
 
       return res.status(200).json({
         success: true, data: {

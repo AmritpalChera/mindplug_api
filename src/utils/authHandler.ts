@@ -13,6 +13,6 @@ export default async function authHandler(req: NextApiRequest) {
   if (error || !data || !data[0]) throw "Invalid authorization";
 
 
-  const analytics = await requestLimiter(token, data[0].userId);
-  return {...data[0], analytics: analytics} as UserDataType;
+  // const analytics = await requestLimiter(token, data[0].userId);
+  return {...data[0]} as UserDataType;
 }

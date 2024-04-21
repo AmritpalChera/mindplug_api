@@ -10,36 +10,10 @@ type analyticsType = {
   plan: string,
 }
 
-type analyticMetricsCount = {
-  totalProjects?: number,
-  totalVectors?: number,
-  totalCollections?: number,
-  analytics: analyticsType,
-}
-
 export interface LimiterType extends analyticsType {
   quotaExceeded: boolean,
   customPlan: boolean
 }
-
-export const subtractAnalyticsCount = async ({ totalProjects = 0, totalVectors = 0, totalCollections = 0, analytics }: analyticMetricsCount) => {
-  await supabase.from('analytics').update({
-    totalProjects: analytics.totalProjects - totalProjects,
-    totalVectors: analytics.totalVectors - totalVectors,
-    totalCollections: analytics.totalCollections - totalCollections,
-    totalRequests: analytics.totalRequests + 1
-  }).eq('mindplugKey', analytics.mindplugKey);
-}
-
-export const addAnalyticsCount = async ({ totalProjects = 0, totalVectors = 0, totalCollections = 0, analytics }: analyticMetricsCount) => {
-  await supabase.from('analytics').update({
-    totalProjects: analytics.totalProjects + totalProjects,
-    totalVectors: analytics.totalVectors + totalVectors,
-    totalCollections: analytics.totalCollections + totalCollections,
-    totalRequests: analytics.totalRequests + 1
-  }).eq('mindplugKey', analytics.mindplugKey);
-}
-
 
 export default async function requestLimiter(mindplugKey: string, _id: string) {
   // adds a request to the given mindplug key

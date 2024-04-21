@@ -20,7 +20,6 @@ export type FileContentType = {
 };
 
 export type UserDataType = {
-  analytics: LimiterType,
   mindplugKey: string,
   openaiKey: string,
   pineconeKey: string,

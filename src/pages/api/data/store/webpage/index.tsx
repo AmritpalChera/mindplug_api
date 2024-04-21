@@ -72,7 +72,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
       });
 
       if (!embeds) {
-        throw `Could not generate embeddings. ${userData.analytics.customPlan && 'Please check your openai key in settings.'} Please contact support if needed`;
+        throw `Could not generate embeddings. Please check your openai key in settings. Contact @AmritBuilds on X for support`;
       }
 
       const pineconeVectors = generateVector({ data: embeds, uploadId, metadata, vectorId, url } );
