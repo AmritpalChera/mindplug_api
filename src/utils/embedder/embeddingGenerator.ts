@@ -116,30 +116,3 @@ export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: Mu
   return chunkEmbeddings;
     
 }
-
-export async function smartEmbedderDocs({data, customKey}: MultiContent) {
-  const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
-
-  const chunks = await chunkDocuments(data, 1012);
-  // return null;
-
-  let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
-
-    const openaiEmbedder = () => openai.embeddings.create({
-      model: 'text-embedding-ada-002',
-      input: chunk.pageContent
-    });
-
-    const embedding = await limiter.schedule(() => openaiEmbedder().catch(e => openaiEmbedder()));
-    delete chunk.metadata.loc;
-    return {
-      content: chunk.pageContent,
-      embedding: embedding?.data[0].embedding,
-      metadata: chunk.metadata
-    } as EmbedType;
-  }));
-
-  
-
-  return chunkEmbeddings;
-}
