@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { any, array, boolean, number, object, record, string, TypeOf } from "zod";
 import authHandler from '@/utils/authHandler';
-import embeddingGenerator, { embeddingGeneratorMulti, smartEmbedderDocs } from '@/utils/embedder/embeddingGenerator';
+import embeddingGenerator, { embeddingGeneratorMulti } from '@/utils/embedder/embeddingGenerator';
 import generateVector from '@/utils/pinecone/generateVector';
 import upsertData from '@/utils/pinecone/upsert';
 import { EmbedType } from '@/utils/types/types';
@@ -64,7 +64,7 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     try {
       const uploadId = uuidv4(); //upload id
       let embeds: EmbedType[] | null = null;
-      embeds = await smartEmbedderDocs({ data, customKey: userData.openaiKey }).catch((err) => {
+      embeds = await embeddingGeneratorMulti({ data, customKey: userData.openaiKey }).catch((err) => {
         console.log('err is', err);
         return null
       });
