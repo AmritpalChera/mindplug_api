@@ -24,8 +24,7 @@ const bodySchema = object({
   })),
   db: string(),
   chunkSize: number().optional(),
-  metadata: record(any()).optional(),
-  smartEmbedder: boolean().optional()
+  metadata: record(any()).optional()
 })
 
 interface FetchRequest extends NextApiRequest {
@@ -58,24 +57,17 @@ export default async function handler(req: FetchRequest, res: NextApiResponse<Da
     }
 
     // Generate embeddings and store data to pinecone. Return the stored data _id from Supabase or MongoDB
-    const { collection, db, chunkSize, data, metadata, smartEmbedder } = req.body;
+    const { collection, db, chunkSize, data, metadata } = req.body;
     // collection is an eq of namespace and content is the metadata of the embedidngs
     // id should match the id in the supabase database
 
     try {
       const uploadId = uuidv4(); //upload id
       let embeds: EmbedType[] | null = null;
-      if (smartEmbedder) {
-        embeds = await smartEmbedderDocs({ data, customKey: userData.openaiKey }).catch((err) => {
-          console.log('err is', err);
-          return null
-        });
-      } else {
-        embeds = await embeddingGeneratorMulti({ data, chunkSize: chunkSize, customKey: userData.openaiKey }).catch((err) => {
-          console.log('error is: ', err);
-          return null
-        });
-      }
+      embeds = await smartEmbedderDocs({ data, customKey: userData.openaiKey }).catch((err) => {
+        console.log('err is', err);
+        return null
+      });
         
 
       if (!embeds) {

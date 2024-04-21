@@ -1,7 +1,7 @@
 
 import initializeOpenai from "../setup/openai";
 import { EmbedType, FileContentType } from "../types/types";
-import chunkRawData, { chunkDocuments, smartChunkDocuments } from "./chunk";
+import chunkRawData, { chunkDocuments } from "./chunk";
 import Bottleneck from "bottleneck";
 
 
@@ -120,7 +120,7 @@ export async function embeddingGeneratorMulti({ data, chunkSize, customKey }: Mu
 export async function smartEmbedderDocs({data, customKey}: MultiContent) {
   const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
 
-  const chunks = await smartChunkDocuments(data, openai);
+  const chunks = await chunkDocuments(data, 1012);
   // return null;
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
