@@ -121,6 +121,7 @@ export async function smartEmbedderDocs({data, customKey}: MultiContent) {
   const openai = initializeOpenai(customKey || process.env.NEXT_PUBLIC_OPENAI_KEY!);
 
   const chunks = await smartChunkDocuments(data, openai);
+  // return null;
 
   let chunkEmbeddings = await Promise.all(chunks.map(async (chunk) => {
 
